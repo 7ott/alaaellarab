@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
 <link rel="icon" href="logo.jpg">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#2A2927">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>علاء العراب</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
@@ -350,7 +353,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 
     const q=$("qText").value.trim(), qa=$("qArea").value, qt=$("qType").value, sort=$("qSort").value;
     let list=rows.filter(r=>(!statusFilter||r.status===statusFilter)&&(!qa||r.area===qa)&&(!qt||r.type===qt)
-      &&(!q||[r.note,r.source,r.area].join(" ").includes(q)));
+      &&(!q||[r.note,r.source,r.area,r.name,r.phone].join(" ").includes(q)));
     list.sort((a,b)=>{
       if(sort==="follow")return (a.followUp||"9999").localeCompare(b.followUp||"9999");
       if(sort==="budget")return (b.budget||0)-(a.budget||0);
@@ -374,10 +377,12 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
         <div class="meta">
           ${r.budget?`<span>الميزانية: <span class="budget">${fmtBudget(r.budget)}</span>${r.pay?` · ${esc(r.pay)}`:""}</span>`:r.pay?`<span>${esc(r.pay)}</span>`:""}
           ${r.source?`<span>المصدر: ${esc(r.source)}</span>`:""}
+          ${r.name?`<span>الاسم: ${esc(r.name)}</span>`:""}
           ${r.createdAt?`<span>اتسجل ${new Date(r.createdAt).toLocaleDateString("ar-EG",{day:"numeric",month:"short"})}</span>`:""}
         </div>
         <div class="ctrl">
           ${url?`<a href="${esc(url)}" target="_blank" rel="noopener">افتح البوست ↗</a>`:""}
+          ${/^01\d{9}$/.test(r.phone||"")?`<a href="https://wa.me/2${esc(r.phone)}" target="_blank" rel="noopener">واتساب ${esc(r.phone)}</a><a href="tel:${esc(r.phone)}">اتصال</a>`:""}
           <select data-act="status" aria-label="الحالة"${dis}>${statusOpts(r.status)}</select>
           <label style="display:flex;gap:6px;align-items:center;font-size:13px">متابعة<input type="date" data-act="follow" value="${esc(r.followUp||"")}"${dis}></label>
           ${canWrite?`<button class="btn small ghost" data-act="edit" type="button">تعديل</button>
@@ -451,6 +456,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     try{const s=localStorage.getItem("radar-last-source");if(s&&!$("fSource").value)$("fSource").value=s}catch(e){}
     $("pasteHits").innerHTML=hits.length?hits.map(h=>`<span class="chip">${esc(h)}</span>`).join("")+(p.area?"":`<span class="chip" style="background:var(--due-soft)">اختار المنطقة بإيدك</span>`):"";
   }
+  window.radarPaste=t=>{$("fPaste").value=t;applyPaste();$("form").scrollIntoView({block:"start"})};
   let pasteT=null;
   $("fPaste").addEventListener("input",()=>{clearTimeout(pasteT);pasteT=setTimeout(applyPaste,250)});
   $("fSource").addEventListener("change",()=>{try{localStorage.setItem("radar-last-source",$("fSource").value)}catch(e){}});
@@ -508,11 +514,15 @@ const SUPABASE_ANON_KEY = "sb_publishable_Jqec3ItuA5XpEG6l2jrWmQ_-u8ba5Bf";     
       async update(id, p){ const { error } = await sb.from("requests").update(toRow(p)).eq("id", id); if (error) throw error; load(); },
       async remove(id){ const { error } = await sb.from("requests").delete().eq("id", id); if (error) throw error; load(); }
     }, "متزامن ✓");
+    const q = new URLSearchParams(location.search);
+    const shared = [q.get("title"), q.get("text"), q.get("url")].filter(Boolean).join(" ");
+    if (shared && window.radarPaste) { window.radarPaste(shared); history.replaceState(null, "", "app.html"); }
   }
   // من غير تسجيل دخول → صفحة الدخول
-  sb.auth.getSession().then(({ data }) => { if (data.session) start(); else location.replace("index.html"); });
+  sb.auth.getSession().then(({ data }) => { if (data.session) start(); else location.replace("index.html" + location.search); });
   sb.auth.onAuthStateChange((_e, session) => { if (!session) location.replace("index.html"); });
 })();
 </script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}</script>
 </body>
 </html>
