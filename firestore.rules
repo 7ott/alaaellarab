@@ -4,7 +4,7 @@ service cloud.firestore {
     // غيّر الإيميل ده لإيميلك (نفس الإيميل اللي في index.html)
     function isOwner() {
       return request.auth != null
-        && request.auth.token.email == "YOUR_EMAIL@gmail.com"
+        && request.auth.token.email == "alaahocky@gmail.com"
         && request.auth.token.email_verified == true;
     }
     match /requests/{id} {
