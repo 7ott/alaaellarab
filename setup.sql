@@ -1,6 +1,6 @@
 -- رادار الطلبات العقارية — علاء العراب
 -- الصق الملف ده كله في SQL Editor واضغط Run
--- قبل ما تشغله: غيّر YOUR_EMAIL@gmail.com لإيميلك (مكانين تحت)
+-- قبل ما تشغله: غيّر alaahocky@gmail.com لإيميلك (مكانين تحت)
 
 create table if not exists public.requests (
   id          uuid primary key default gen_random_uuid(),
@@ -24,8 +24,8 @@ drop policy if exists "owner only" on public.requests;
 create policy "owner only" on public.requests
   for all
   to authenticated
-  using      ((auth.jwt() ->> 'email') = 'YOUR_EMAIL@gmail.com')
-  with check ((auth.jwt() ->> 'email') = 'YOUR_EMAIL@gmail.com');
+  using      ((auth.jwt() ->> 'email') = 'alaahocky@gmail.com')
+  with check ((auth.jwt() ->> 'email') = 'alaahocky@gmail.com');
 
 -- تحديث لحظي لما تفتح الصفحة على أكتر من جهاز
 alter publication supabase_realtime add table public.requests;
