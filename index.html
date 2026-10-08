@@ -440,15 +440,21 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 <script type="module">
 // ===== إعدادات Firebase: الصق هنا الكود من Project settings > Your apps > Web app =====
 const firebaseConfig = {
-  apiKey: "PASTE_HERE",
-  authDomain: "PASTE_HERE",
-  projectId: "PASTE_HERE",
-  storageBucket: "PASTE_HERE",
-  messagingSenderId: "PASTE_HERE",
-  appId: "PASTE_HERE"
+  apiKey: "AIzaSyB0BK0HWfKw-r3qJZgLPmXqjc6dhUhtwL8",
+  authDomain: "ellarab.firebaseapp.com",
+  databaseURL: "https://ellarab-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "ellarab",
+  storageBucket: "ellarab.firebasestorage.app",
+  messagingSenderId: "253851928084",
+  appId: "1:253851928084:web:8ed0542507edd4f9a60901",
+  measurementId: "G-J1T2SWMJM0"
 };
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 // ===== الإيميل الوحيد المسموح له يدخل (نفس الإيميل اللي في firestore.rules) =====
-const ALLOWED_EMAIL = "YOUR_EMAIL@gmail.com";
+const ALLOWED_EMAIL = "alaahocky@gmail.com";
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
