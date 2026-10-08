@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // غيّر الإيميل ده لإيميلك (نفس الإيميل اللي في index.html)
+    function isOwner() {
+      return request.auth != null
+        && request.auth.token.email == "YOUR_EMAIL@gmail.com"
+        && request.auth.token.email_verified == true;
+    }
+    match /requests/{id} {
+      allow read, write: if isOwner();
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
