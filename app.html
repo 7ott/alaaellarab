@@ -237,6 +237,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
         </label>
         <label>طريقة الدفع
           <select id="fPay"><option value="">غير محدد</option><option>كاش</option><option>تقسيط</option></select>
+          <input id="fTerm" list="terms" maxlength="30" placeholder="مدة التقسيط" hidden style="margin-top:6px">
+          <datalist id="terms"><option value="6 شهور"><option value="سنة"><option value="سنتين"><option value="3 سنين"></datalist>
         </label>
         <label>متابعة يوم
           <input id="fFollow" type="date">
@@ -360,8 +362,9 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   function safeUrl(u){try{const x=new URL(u);return /^https?:$/.test(x.protocol)?x.href:""}catch(e){return ""}}
 
   function resetForm(){
-    $("form").reset(); editing=null; $("saveBtn").textContent="حفظ الطلب"; $("cancelEdit").hidden=true;
+    $("form").reset(); $("fTerm").hidden=true; editing=null; $("saveBtn").textContent="حفظ الطلب"; $("cancelEdit").hidden=true;
   }
+  $("fPay").addEventListener("change",()=>{$("fTerm").hidden=$("fPay").value!=="تقسيط";if($("fPay").value!=="تقسيط")$("fTerm").value=""});
   $("cancelEdit").onclick=()=>{resetForm();$("formMsg").textContent=""};
   $("form").addEventListener("submit",async e=>{
     e.preventDefault();
@@ -372,7 +375,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     if(link&&!safeUrl(link)){$("formMsg").textContent="اللينك لازم يبدأ بـ https://";$("formMsg").className="msg err";return}
     const rec={
       link, source:$("fSource").value.trim(), area, type:$("fType").value, purpose:$("fPurpose").value,
-      budget:parseBudget($("fBudget").value), pay:$("fPay").value, followUp:$("fFollow").value||"",
+      budget:parseBudget($("fBudget").value), pay:$("fPay").value==="تقسيط"&&$("fTerm").value.trim()?"تقسيط - "+$("fTerm").value.trim():$("fPay").value, followUp:$("fFollow").value||"",
       note:$("fNote").value.trim()
     };
     if(link&&!editing){
@@ -521,7 +524,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     if(b.dataset.act==="edit"){
       editing=id; $("fLink").value=r.link||""; $("fSource").value=r.source||""; $("fArea").value=r.area||"";
       $("fType").value=r.type||"شقة"; $("fPurpose").value=r.purpose||"شراء"; $("fBudget").value=r.budget||"";
-      $("fPay").value=r.pay||""; $("fFollow").value=r.followUp||""; $("fNote").value=r.note||"";
+      {const pp=r.pay||"";$("fPay").value=pp.startsWith("تقسيط")?"تقسيط":pp;$("fTerm").value=pp.startsWith("تقسيط - ")?pp.slice(8):"";$("fTerm").hidden=!pp.startsWith("تقسيط")} $("fFollow").value=r.followUp||""; $("fNote").value=r.note||"";
       $("saveBtn").textContent="حفظ التعديل"; $("cancelEdit").hidden=false; $("formMsg").textContent="";
       $("form").scrollIntoView({behavior:"smooth",block:"start"}); return;
     }
@@ -546,7 +549,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     for(const [re,v] of AREA_RULES){if(re.test(t)){out.area=v;break}}
     for(const [re,v] of TYPE_RULES){if(re.test(t)){out.type=v;break}}
     if(/مطلوب|عايز|عاوز|محتاج|ادور|بدور|اشتري|للشراء/.test(t))out.purpose="شراء"; else if(/للبيع|بيع|من المالك|عندي|املك|تمليك/.test(t))out.purpose="تسويق";
-    if(/تقسيط|قسط|اقساط|مقدم/.test(t))out.pay="تقسيط"; else if(/كاش|نقدي/.test(t))out.pay="كاش";
+    if(/تقسيط|قسط|اقساط|مقدم/.test(t)){out.pay="تقسيط";const tm=t.match(/(\d+)\s*(شهر|شهور|سنه|سنين|سنوات)/)||(/سنتين/.test(t)?[0,"2","سنين"]:/(علي|على) سنه|لمده سنه/.test(t)?[0,"1","سنه"]:null);if(tm){out.term=/شه/.test(tm[2])?tm[1]+" شهور":tm[1]==="1"?"سنة":tm[1]==="2"?"سنتين":tm[1]+" سنين"}} else if(/كاش|نقدي/.test(t))out.pay="كاش";
     const clean=t.replace(/https?:\/\/\S+/g," ").replace(/(\+?2)?01[0125]\d{8}/g," ");
     const m=clean.match(/(\d+(?:[.,٫]\d+)?)\s*(مليون|مليونين|م\b|الف|ك\b|k\b)/i);
     if(m){let n=parseFloat(m[1].replace(/[,٫]/,"."));const u=m[2];n*= /مليون|م/.test(u)?1e6:1e3;out.budget=Math.round(n)}
@@ -563,7 +566,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     const p=parsePost($("fPaste").value), hits=[];
     const set=(id,v,k,label)=>{if(v==null||v==="")return;const el=$(id);el.value=v;el.classList.add("filled");setTimeout(()=>el.classList.remove("filled"),1600);hits.push(`${NAMES[k]}: ${label??v}`)};
     set("fLink",p.link,"link","✓"); set("fArea",p.area,"area"); set("fType",p.type,"type");
-    set("fPurpose",p.purpose,"purpose"); set("fPay",p.pay,"pay");
+    set("fPurpose",p.purpose,"purpose"); set("fPay",p.pay,"pay"); if(p.pay==="تقسيط"){$("fTerm").hidden=false;if(p.term)set("fTerm",p.term,"pay","مدة "+p.term)}
     if(p.budget)set("fBudget",p.budget,"budget",fmtBudget(p.budget));
     set("fNote",p.note,"note","✓");
     if(!$("fFollow").value){const d=new Date(Date.now()+864e5);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());$("fFollow").value=d.toISOString().slice(0,10)}

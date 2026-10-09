@@ -3,11 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>اطلب أو اعرض عقارك | العراب للتسويق العقاري</title>
-<meta name="description" content="عايز تشتري أو تبيع عقار في بني سويف شرق النيل؟ سيب بياناتك وفريق العراب يكلمك.">
-<meta property="og:title" content="اشتري أو بيع عقارك في بني سويف شرق النيل — العراب">
-<meta property="og:description" content="سيب طلبك في دقيقة، وإحنا نكلمك.">
-<meta property="og:image" content="logo.jpg">
+<title>العراب للعقارات في مدينة بني سويف | اشتري أو بيع عقارك</title>
+<meta name="description" content="العراب للعقارات في مدينة بني سويف شرق النيل. عايز تشتري أو تبيع شقة أو أرض أو فيلا تمليك؟ سيب طلبك في دقيقة وإحنا نكلمك.">
+<link rel="canonical" href="https://www.alaaelarab.online/talab.html">
+
+<!-- مشاركة اللينك على فيسبوك وواتساب ولينكدإن وتليجرام -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="العراب للعقارات">
+<meta property="og:locale" content="ar_EG">
+<meta property="og:url" content="https://www.alaaelarab.online/talab.html">
+<meta property="og:title" content="العراب للعقارات في مدينة بني سويف">
+<meta property="og:description" content="عايز تشتري أو تبيع شقة أو أرض أو فيلا تمليك في شرق النيل؟ سيب طلبك في دقيقة وإحنا نكلمك.">
+<meta property="og:image" content="https://www.alaaelarab.online/og-image.jpg">
+<meta property="og:image:secure_url" content="https://www.alaaelarab.online/og-image.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="العراب للعقارات — مدينة بني سويف">
+
+<!-- مشاركة اللينك على تويتر / X بصورة كبيرة -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="العراب للعقارات في مدينة بني سويف">
+<meta name="twitter:description" content="اشتري أو بيع شقة أو أرض أو فيلا تمليك في شرق النيل. سيب طلبك وإحنا نكلمك.">
+<meta name="twitter:image" content="https://www.alaaelarab.online/og-image.jpg">
 <meta name="theme-color" content="#2A2927">
 <link rel="icon" href="logo.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -79,6 +97,8 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:0 16px 28px}
 #areaOther{margin-top:6px}
 select:invalid{color:var(--muted)}
 select option{color:var(--ink)}
+#termBox{display:grid;gap:8px}
+#termOther{margin-top:2px}
 </style>
 </head>
 <body>
@@ -135,6 +155,16 @@ select option{color:var(--ink)}
         </fieldset>
       </div>
 
+      <fieldset id="termBox" hidden>
+        <legend>مدة التقسيط</legend>
+        <div class="seg three">
+          <label><input type="radio" name="term" value="6 شهور"><span>6 شهور</span></label>
+          <label><input type="radio" name="term" value="سنة"><span>سنة</span></label>
+          <label><input type="radio" name="term" value="__other"><span>أخرى</span></label>
+        </div>
+        <input id="termOther" maxlength="30" placeholder="مثلًا سنتين، 3 سنين، 5 سنين…" hidden>
+      </fieldset>
+
       <label>تفاصيل تانية <small>(اختياري)</small>
         <textarea id="note" rows="3" maxlength="500" placeholder="المساحة، عدد الغرف، الدور، رقم القطعة أو المجاورة…"></textarea>
       </label>
@@ -185,6 +215,13 @@ const SUPABASE_ANON_KEY = "sb_publishable_Jqec3ItuA5XpEG6l2jrWmQ_-u8ba5Bf";
     $("budgetLabel").textContent = isOwner() ? "السعر المطلوب" : "الميزانية";
   }));
   $("area").addEventListener("change", () => { $("areaOther").hidden = $("area").value !== "__other"; if (!$("areaOther").hidden) $("areaOther").focus(); });
+  document.querySelectorAll('input[name=pay]').forEach(r => r.addEventListener("change", () => {
+    $("termBox").hidden = r.value !== "تقسيط" || !r.checked;
+  }));
+  document.querySelectorAll('input[name=term]').forEach(r => r.addEventListener("change", () => {
+    $("termOther").hidden = r.value !== "__other" || !r.checked;
+    if (!$("termOther").hidden) $("termOther").focus();
+  }));
   const say = (t, err) => { $("msg").textContent = t; $("msg").className = "msg" + (err ? " err" : ""); };
   let lastSent = 0;
 
@@ -199,7 +236,14 @@ const SUPABASE_ANON_KEY = "sb_publishable_Jqec3ItuA5XpEG6l2jrWmQ_-u8ba5Bf";
     if ($("area").value === "__other" && !$("areaOther").value.trim()) { $("areaOther").focus(); return say("اكتب اسم الحي", true); }
     if (!$("ok").checked) return say("لازم توافق إننا نتواصل معاك عشان نقدر نرد على طلبك", true);
     if (Date.now() - lastSent < 30000) return say("طلبك اتبعت بالفعل، استنى شوية لو عايز تبعت تاني", true);
-    const pay = (document.querySelector('input[name=pay]:checked') || {}).value || "";
+    let pay = (document.querySelector('input[name=pay]:checked') || {}).value || "";
+    if (pay === "تقسيط") {
+      const term = (document.querySelector('input[name=term]:checked') || {}).value || "";
+      if (!term) return say("اختار مدة التقسيط", true);
+      const t = term === "__other" ? $("termOther").value.trim() : term;
+      if (!t) { $("termOther").focus(); return say("اكتب مدة التقسيط", true); }
+      pay = "تقسيط - " + t;
+    }
     const row = {
       name, phone,
       purpose: document.querySelector('input[name=purpose]:checked').value,
