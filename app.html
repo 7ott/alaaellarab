@@ -211,7 +211,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
         </label>
         <label>نوع العقار
           <select id="fType">
-            <option>شقة</option><option>أرض</option><option>محل</option><option>فيلا</option><option>بيت / مبنى</option><option>مكتب / عيادة</option><option>أخرى</option>
+            <option>شقة</option><option>أرض</option><option>فيلا</option>
           </select>
         </label>
         <label>مشتري ولا مالك
@@ -252,6 +252,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   <section class="panel" aria-labelledby="listH">
     <div class="row-actions" style="justify-content:space-between">
       <h2 id="listH">سجل الطلبات <span class="msg" id="count"></span></h2>
+      <div class="row-actions"><span class="msg" id="pullMsg" role="status"></span><button class="btn small ghost" id="pullBtn" type="button">اسحب كومنتات الصفحة</button></div>
       <button class="btn small danger" id="clearEx" type="button" hidden>حذف الأمثلة</button>
     </div>
     <div class="chips" id="statusChips" style="margin-top:12px" role="group" aria-label="فلترة بالحالة"></div>
@@ -268,8 +269,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 
 <script>
 (function(){
-  const AREAS=["بني سويف - المدينة","بني سويف الجديدة","شرق النيل","الواسطى","ناصر","إهناسيا","ببا","سمسطا","الفشن"];
-  const TYPES=["شقة","أرض","محل","فيلا","بيت / مبنى","مكتب / عيادة","أخرى"];
+  const AREAS=["الحي الأول", "الحي الثالث", "الحي الرابع", "حي الأزهر", "الحي الخامس", "الحي السابع", "الحي الثامن", "الحي العاشر", "الحي 11", "الحي 12", "الحي 13", "مسلسل 1", "مسلسل 3"];
+  const TYPES=["شقة","أرض","فيلا"];
   const STATUSES=[
     {k:"new",t:"جديد",c:""},
     {k:"contacted",t:"تم الرد",c:""},
@@ -475,11 +476,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 
   /* ---------- smart paste: read a post and fill the form ---------- */
   const norm=t=>String(t||"").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[إأآ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").replace(/[ًٌٍَُِّْـ]/g,"");
-  const AREA_RULES=[
-    [/بني ?سويف (ال)?جديد/, "بني سويف الجديدة"],[/شرق (ال)?نيل/, "شرق النيل"],[/الواسطي|واسطي/, "الواسطى"],
-    [/اهناسيا/, "إهناسيا"],[/\bببا\b/, "ببا"],[/سمسطا/, "سمسطا"],[/الفشن/, "الفشن"],[/مركز ناصر|\bناصر\b/, "ناصر"],
-    [/بني ?سويف|بنى ?سويف/, "بني سويف - المدينة"]];
-  const TYPE_RULES=[[/فيلا|فيلل/,"فيلا"],[/محل|محلات/,"محل"],[/مكتب|عياده/,"مكتب / عيادة"],[/عماره|مبني|منزل|\bبيت\b/,"بيت / مبنى"],[/ارض|قطعه/,"أرض"],[/شقه|شقق|دوبلكس|روف/,"شقة"]];
+  const AREA_RULES=[[/الحي (ال)?حادي عشر|الحي 11(?!\d)/, "الحي 11"],[/الحي (ال)?ثاني عشر|الحي 12(?!\d)/, "الحي 12"],[/الحي (ال)?ثالث عشر|الحي 13(?!\d)/, "الحي 13"],[/الحي (ال)?عاشر|الحي 10(?!\d)/, "الحي العاشر"],[/الحي (ال)?اول|الحي 1(?!\d)|حي اول/, "الحي الأول"],[/الحي (ال)?ثالث|الحي 3(?!\d)|المستشارين/, "الحي الثالث"],[/الحي (ال)?رابع|الحي 4(?!\d)/, "الحي الرابع"],[/(ال)?حي (ال)?ازهر|الازهر/, "حي الأزهر"],[/الحي (ال)?خامس|الحي 5(?!\d)/, "الحي الخامس"],[/الحي (ال)?سابع|الحي 7(?!\d)/, "الحي السابع"],[/الحي (ال)?ثامن|الحي 8(?!\d)/, "الحي الثامن"],[/مسلسل ?1(?!\d)|مسلسل (ال)?اول/, "مسلسل 1"],[/مسلسل ?3(?!\d)|مسلسل (ال)?ثالث/, "مسلسل 3"],[/شرق (ال)?نيل|بني ?سويف (ال)?جديد/, "شرق النيل"]];
+  const TYPE_RULES=[[/فيلا|فيلل|تاون ?هاوس|توين ?هاوس/,"فيلا"],[/ارض|قطعه/,"أرض"],[/شقه|شقق|دوبلكس|روف/,"شقة"]];
   function parsePost(raw){
     const out={}, t=norm(raw);
     const link=(raw.match(/https?:\/\/[^\s"'<>]+/)||[])[0]; if(link)out.link=link;
@@ -490,7 +488,9 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     const clean=t.replace(/https?:\/\/\S+/g," ").replace(/(\+?2)?01[0125]\d{8}/g," ");
     const m=clean.match(/(\d+(?:[.,٫]\d+)?)\s*(مليون|مليونين|م\b|الف|ك\b|k\b)/i);
     if(m){let n=parseFloat(m[1].replace(/[,٫]/,"."));const u=m[2];n*= /مليون|م/.test(u)?1e6:1e3;out.budget=Math.round(n)}
+    else if(/مليون ?و ?نص/.test(clean))out.budget=1.5e6;
     else if(/مليونين/.test(clean))out.budget=2e6;
+    else if(/(^|\s)مليون/.test(clean))out.budget=1e6;
     else{const big=(clean.match(/\b\d{4,8}\b/g)||[]).map(Number).filter(v=>v>=3000);if(big.length)out.budget=Math.max(...big)}
     const note=String(raw).replace(/https?:\/\/[^\s]+/g,"").replace(/(\+?2)?0?1[0125][\s-]?\d{3,4}[\s-]?\d{4}/g,"").replace(/[٠-٩]{11}/g,"").replace(/\s+/g," ").trim();
     if(note)out.note=note.slice(0,300);
@@ -514,8 +514,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   $("fSource").addEventListener("change",()=>{try{localStorage.setItem("radar-last-source",$("fSource").value)}catch(e){}});
 
   /* ---------- quick Facebook search links ---------- */
-  const QS_WORDS=["مطلوب شقة","عايز أشتري شقة","مطلوب أرض","مطلوب محل","مطلوب بيت","شقة للبيع من المالك","أرض للبيع من المالك","بيت للبيع من المالك"];
-  const QS_AREAS=["بني سويف","بني سويف الجديدة","شرق النيل","الواسطى","ناصر","إهناسيا","ببا","سمسطا","الفشن"];
+  const QS_WORDS=["مطلوب شقة","عايز أشتري شقة","مطلوب أرض","مطلوب فيلا","شقة للبيع من المالك","أرض للبيع من المالك","فيلا للبيع"];
+  const QS_AREAS=["بني سويف الجديدة","شرق النيل بني سويف","الحي الأول بني سويف","الحي الثالث بني سويف","حي الأزهر بني سويف","مسلسل بني سويف"];
   $("qsArea").innerHTML=QS_AREAS.map(a=>`<option>${esc(a)}</option>`).join("");
   try{const k=localStorage.getItem("radar-qs-area");if(k&&QS_AREAS.includes(k))$("qsArea").value=k}catch(e){}
   function renderQs(){
@@ -547,6 +547,14 @@ const SUPABASE_ANON_KEY = "sb_publishable_Jqec3ItuA5XpEG6l2jrWmQ_-u8ba5Bf";     
   const toRow = r => { const o = {}; for (const [k,v] of Object.entries(r)) { if (k==="followUp") o.follow_up = v || null; else if (k==="createdAt") o.created_at = v; else if (k!=="id") o[k] = v; } return o; };
   const fromRow = r => ({...r, followUp: r.follow_up || "", createdAt: r.created_at});
   let started = false;
+  document.getElementById("pullBtn").onclick = async () => {
+    const b = document.getElementById("pullBtn"), m = document.getElementById("pullMsg");
+    b.disabled = true; m.textContent = "جاري السحب…"; m.className = "msg";
+    const { data, error } = await sb.functions.invoke("fb-comments", { body: {} });
+    b.disabled = false;
+    if (error || data?.error) { m.textContent = "ما اتسحبش: " + (data?.error || "اتأكد إن الربط بفيسبوك متظبط"); m.className = "msg err"; return; }
+    m.textContent = data.added ? `اتضاف ${data.added} طلب جديد` : "مفيش طلبات جديدة";
+  };
   document.getElementById("logoutBtn").onclick = async () => { await sb.auth.signOut(); location.replace("index.html"); };
   function start(){
     if (started) return; started = true;
