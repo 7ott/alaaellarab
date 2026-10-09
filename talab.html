@@ -77,6 +77,8 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:0 16px 28px}
   footer{grid-column:2;padding-bottom:20px}
 }
 #areaOther{margin-top:6px}
+select:invalid{color:var(--muted)}
+select option{color:var(--ink)}
 </style>
 </head>
 <body>
@@ -108,13 +110,13 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:0 16px 28px}
 
       <div class="row">
         <label>نوع العقار
-          <select id="type">
-            <option>شقة</option><option>أرض</option><option>فيلا</option>
+          <select id="type" required>
+            <option value="" disabled selected>اختار من هنا</option><option>شقة</option><option>أرض</option><option>فيلا</option>
           </select>
         </label>
         <label>الحي <small>(بني سويف شرق النيل)</small>
-          <select id="area">
-            <option>الحي الأول</option><option>الحي الثالث</option><option>الحي الرابع</option><option>حي الأزهر</option><option>الحي الخامس</option><option>الحي السابع</option><option>الحي الثامن</option><option>الحي العاشر</option><option>الحي 11</option><option>الحي 12</option><option>الحي 13</option><option>مسلسل 1</option><option>مسلسل 3</option><option value="__other">حي تاني…</option>
+          <select id="area" required>
+            <option value="" disabled selected>اختار من هنا</option><option>الحي الأول</option><option>الحي الثالث</option><option>الحي الرابع</option><option>حي الأزهر</option><option>الحي الخامس</option><option>الحي السابع</option><option>الحي الثامن</option><option>الحي العاشر</option><option>الحي 11</option><option>الحي 12</option><option>الحي 13</option><option>مسلسل 1</option><option>مسلسل 3</option><option value="__other">حي تاني…</option>
           </select>
           <input id="areaOther" maxlength="40" placeholder="اكتب اسم الحي أو المنطقة" hidden>
         </label>
@@ -192,6 +194,9 @@ const SUPABASE_ANON_KEY = "sb_publishable_Jqec3ItuA5XpEG6l2jrWmQ_-u8ba5Bf";
     const name = $("name").value.trim(), phone = normPhone($("phone").value);
     if (!name) return say("اكتب اسمك", true);
     if (!phone) return say("اكتب رقم موبايل مصري صحيح، 11 رقم ويبدأ بـ 01", true);
+    if (!$("type").value) { $("type").focus(); return say("اختار نوع العقار", true); }
+    if (!$("area").value) { $("area").focus(); return say("اختار الحي", true); }
+    if ($("area").value === "__other" && !$("areaOther").value.trim()) { $("areaOther").focus(); return say("اكتب اسم الحي", true); }
     if (!$("ok").checked) return say("لازم توافق إننا نتواصل معاك عشان نقدر نرد على طلبك", true);
     if (Date.now() - lastSent < 30000) return say("طلبك اتبعت بالفعل، استنى شوية لو عايز تبعت تاني", true);
     const pay = (document.querySelector('input[name=pay]:checked') || {}).value || "";
