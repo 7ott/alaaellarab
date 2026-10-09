@@ -96,6 +96,20 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .ctrl select,.ctrl input{width:auto;padding:4px 8px;font-size:13.5px}
 .ctrl a{color:var(--accent);font-weight:600;font-size:14px}
 .budget{font-variant-numeric:tabular-nums;font-weight:600}
+.match{border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));background:var(--accent-soft);border-radius:10px;padding:0}
+.match summary{cursor:pointer;padding:8px 12px;font-weight:700;font-size:14px;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;list-style:none}
+.match summary::-webkit-details-marker{display:none}
+.match summary small{font-weight:400;color:var(--muted);font-size:12.5px}
+.match summary::after{content:"▾";margin-inline-start:auto;color:var(--accent)}
+.match[open] summary::after{content:"▴"}
+.match .dot{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 25%,transparent)}
+.match ul{list-style:none;margin:0;padding:0 12px 10px;display:grid;gap:6px}
+.match li{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;background:var(--surface);border-radius:8px;padding:7px 10px;font-size:14px}
+.match .mx{flex:1 1 160px;min-width:0;overflow-wrap:anywhere}
+.match .mlinks{display:flex;gap:10px;flex-wrap:wrap}
+.match .mlinks a,.linkbtn{color:var(--accent);font-weight:600;font-size:13.5px;background:none;border:0;padding:0;cursor:pointer;font-family:inherit;text-decoration:underline}
+.match .msg{margin:0 12px 10px}
+.item.flash{outline:3px solid var(--gold);outline-offset:2px;transition:outline-color .3s}
 .role{font-size:12.5px;font-weight:700;border-radius:6px;padding:1px 8px;color:#fff}
 .role.buy{background:#2F5D8A}
 .role.own{background:var(--accent)}
@@ -151,6 +165,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   .ctrl select,.ctrl input{width:100%;font-size:15px;padding:8px}
   .ctrl label{display:grid!important;gap:2px!important;font-size:12px!important}
   .ctrl .btn.small{padding:9px;font-size:14px}
+  .match li{padding:8px}
   .bar{grid-template-columns:minmax(80px,110px) 1fr 28px;font-size:13.5px}
   .row-actions .btn{flex:1 1 auto}
 }
@@ -261,7 +276,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
       <label>المنطقة<select id="qArea"><option value="">الكل</option></select></label>
       <label>مشتري / مالك<select id="qRole"><option value="">الكل</option><option value="شراء">مشترين</option><option value="تسويق">ملاك</option></select></label>
       <label>النوع<select id="qType"><option value="">الكل</option></select></label>
-      <label>الترتيب<select id="qSort"><option value="new">الأحدث</option><option value="follow">أقرب متابعة</option><option value="budget">الميزانية الأعلى</option></select></label>
+      <label>الترتيب<select id="qSort"><option value="new">الأحدث</option><option value="follow">أقرب متابعة</option><option value="budget">الميزانية الأعلى</option><option value="match">أكتر مطابقات</option></select></label>
     </div>
     <div class="list" id="list"></div>
   </section>
@@ -382,7 +397,28 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     const max=ent[0][1];
     el.innerHTML=ent.slice(0,9).map(([k,v])=>`<div class="bar"><span class="name" title="${esc(k)}">${esc(k)}</span><span class="track"><span class="fill" style="width:${Math.max(4,v/max*100)}%"></span></span><span class="n">${v.toLocaleString("ar-EG")}</span></div>`).join("");
   }
+  /* ---------- matching buyers <-> owners ---------- */
+  const isOpen=r=>r.status!=="closed"&&r.status!=="deal";
+  const isOwn=r=>r.purpose==="تسويق";
+  function priceOk(buyer,owner){
+    if(!buyer.budget||!owner.budget)return true;
+    return owner.budget<=buyer.budget*1.15 && owner.budget>=buyer.budget*0.5;
+  }
+  function buildMatches(){
+    const m=new Map(), open=rows.filter(isOpen);
+    for(const r of rows){
+      if(!isOpen(r)){m.set(r.id,[]);continue}
+      const own=isOwn(r);
+      const hits=open.filter(x=>x.id!==r.id&&isOwn(x)!==own&&x.area===r.area&&x.type===r.type&&(own?priceOk(x,r):priceOk(r,x)));
+      hits.sort((a,b)=>Math.abs((a.budget||0)-(r.budget||0))-Math.abs((b.budget||0)-(r.budget||0)));
+      m.set(r.id,hits);
+    }
+    return m;
+  }
+  let matchMap=new Map();
+  const openMatches=new Set();
   function render(){
+    matchMap=buildMatches();
     const active=rows.filter(r=>r.status!=="closed");
     const wk=Date.now()-7*864e5;
     const recent=rows.filter(r=>Date.parse(r.createdAt||0)>=wk), nOwn=recent.filter(r=>r.purpose==="تسويق").length;
@@ -398,17 +434,19 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     bars($("areaBars"),byArea); bars($("typeBars"),byType);
     $("clearEx").hidden=!rows.some(r=>r.example)||!canWrite;
 
-    $("statusChips").innerHTML=[{k:"",t:"الكل"},...STATUSES].map(s=>{
-      const n=s.k?rows.filter(r=>r.status===s.k).length:rows.length;
+    const nMatch=rows.filter(r=>(matchMap.get(r.id)||[]).length).length;
+    $("statusChips").innerHTML=[{k:"",t:"الكل"},{k:"__match",t:"فيه مطابقة"},...STATUSES].map(s=>{
+      const n=s.k==="__match"?nMatch:s.k?rows.filter(r=>r.status===s.k).length:rows.length;
       return `<button type="button" class="chip" data-s="${s.k}" aria-pressed="${statusFilter===s.k}">${s.t} · ${n.toLocaleString("ar-EG")}</button>`}).join("");
 
     const q=$("qText").value.trim(), qa=$("qArea").value, qt=$("qType").value, sort=$("qSort").value;
     const qr=$("qRole").value;
-    let list=rows.filter(r=>(!statusFilter||r.status===statusFilter)&&(!qr||(qr==="تسويق")===(r.purpose==="تسويق"))&&(!qa||r.area===qa)&&(!qt||r.type===qt)
+    let list=rows.filter(r=>(!statusFilter||(statusFilter==="__match"?(matchMap.get(r.id)||[]).length>0:r.status===statusFilter))&&(!qr||(qr==="تسويق")===(r.purpose==="تسويق"))&&(!qa||r.area===qa)&&(!qt||r.type===qt)
       &&(!q||[r.note,r.source,r.area,r.name,r.phone].join(" ").includes(q)));
     list.sort((a,b)=>{
       if(sort==="follow")return (a.followUp||"9999").localeCompare(b.followUp||"9999");
       if(sort==="budget")return (b.budget||0)-(a.budget||0);
+      if(sort==="match")return (matchMap.get(b.id)||[]).length-(matchMap.get(a.id)||[]).length;
       return (b.createdAt||"").localeCompare(a.createdAt||"");
     });
     $("count").textContent=`(${list.length.toLocaleString("ar-EG")})`;
@@ -427,6 +465,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
           ${r.example?`<span class="tag ex">مثال</span>`:""}
         </div>
         ${r.note?`<p class="note">${esc(r.note)}</p>`:""}
+        ${matchBlock(r)}
         <div class="meta">
           ${r.budget?`<span>${r.purpose==="تسويق"?"السعر":"الميزانية"}: <span class="budget">${fmtBudget(r.budget)}</span>${r.pay?` · ${esc(r.pay)}`:""}</span>`:r.pay?`<span>${esc(r.pay)}</span>`:""}
           ${r.source?`<span>المصدر: ${esc(r.source)}</span>`:""}
@@ -444,6 +483,22 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
       </article>`}).join("");
   }
 
+  function matchBlock(r){
+    const m=matchMap.get(r.id)||[]; if(!m.length)return "";
+    const own=isOwn(r);
+    const label=own?`${m.length.toLocaleString("ar-EG")} مشتري مناسب`:`${m.length.toLocaleString("ar-EG")} عرض مناسب`;
+    return `<details class="match" data-id="${esc(r.id)}"${openMatches.has(r.id)?" open":""}>
+      <summary><span class="dot" aria-hidden="true"></span>${label} <small>نفس الحي والنوع${r.budget?" والسعر قريب":""}</small></summary>
+      <ul>${m.slice(0,8).map(x=>`<li>
+        <span class="role ${isOwn(x)?"own":"buy"}">${isOwn(x)?"مالك":"مشتري"}</span>
+        <span class="mx">${x.name?esc(x.name):"بدون اسم"}${x.budget?` · <b class="budget">${fmtBudget(x.budget)}</b>`:""}${x.pay?` · ${esc(x.pay)}`:""}</span>
+        <span class="mlinks">${/^01\d{9}$/.test(x.phone||"")?`<a href="https://wa.me/2${esc(x.phone)}" target="_blank" rel="noopener">واتساب</a>`:""}${safeUrl(x.link)?`<a href="${esc(safeUrl(x.link))}" target="_blank" rel="noopener">البوست</a>`:""}<button type="button" class="linkbtn" data-act="goto" data-target="${esc(x.id)}">افتح الكارت</button></span>
+      </li>`).join("")}</ul>
+      ${m.length>8?`<p class="msg">و${(m.length-8).toLocaleString("ar-EG")} كمان</p>`:""}
+    </details>`;
+  }
+  $("list").addEventListener("toggle",e=>{const d=e.target;if(!d.classList||!d.classList.contains("match"))return;d.open?openMatches.add(d.dataset.id):openMatches.delete(d.dataset.id)},true);
+
   $("statusChips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;statusFilter=b.dataset.s;render()});
   ["qText","qArea","qRole","qType","qSort"].forEach(id=>$(id).addEventListener("input",render));
   $("list").addEventListener("change",async e=>{
@@ -455,6 +510,13 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   });
   $("list").addEventListener("click",async e=>{
     const b=e.target.closest("button[data-act]"); if(!b)return;
+    if(b.dataset.act==="goto"){
+      const t=b.dataset.target;
+      statusFilter=""; ["qText","qArea","qRole","qType"].forEach(k=>$(k).value=""); render();
+      const el=[...document.querySelectorAll(".item")].find(x=>x.dataset.id===t);
+      if(el){el.scrollIntoView({behavior:"smooth",block:"center"});el.classList.add("flash");setTimeout(()=>el.classList.remove("flash"),1800)}
+      return;
+    }
     const it=b.closest(".item"), id=it.dataset.id, r=rows.find(x=>x.id===id); if(!r)return;
     if(b.dataset.act==="edit"){
       editing=id; $("fLink").value=r.link||""; $("fSource").value=r.source||""; $("fArea").value=r.area||"";
