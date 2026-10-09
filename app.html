@@ -113,6 +113,15 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .role{font-size:12.5px;font-weight:700;border-radius:6px;padding:1px 8px;color:#fff}
 .role.buy{background:#2F5D8A}
 .role.own{background:var(--accent)}
+.seg2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.segbtn{font:inherit;font-weight:700;font-size:16px;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.segbtn small{font-weight:400;font-size:12.5px;color:var(--muted);margin-inline-start:4px}
+.segbtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.segbtn[aria-pressed="true"] small{color:var(--accent-ink);opacity:.85}
+.frompost{border:1px dashed var(--line);border-radius:10px;padding:0 12px;margin-top:12px}
+.frompost[open]{padding-bottom:12px}
+.frompost summary{cursor:pointer;padding:10px 0;font-weight:600;font-size:14px;color:var(--accent)}
+.frompost>label{margin-top:8px}
 .paste textarea{min-height:84px;border-style:dashed;border-color:var(--accent);background:var(--surface)}
 #pasteHits .chip{cursor:default;background:var(--accent-soft);border-color:transparent;font-size:12.5px}
 .filled{outline:2px solid var(--gold);outline-offset:1px;transition:outline-color 1.5s}
@@ -206,21 +215,25 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   </section>
 
   <section class="panel" aria-labelledby="addH">
-    <h2 id="addH">إضافة طلب</h2>
+    <h2 id="addH">تسجيل عميل</h2>
     <form id="form" autocomplete="off" style="margin-top:12px">
-      <label class="paste">الصق البوست هنا (النص + اللينك) والخانات هتتملا لوحدها
-        <textarea id="fPaste" rows="3" placeholder="مثال: مطلوب شقة في بني سويف الجديدة 3 غرف في حدود 1.5 مليون كاش https://www.facebook.com/groups/..."></textarea>
-      </label>
-      <div class="chips" id="pasteHits" aria-live="polite"></div>
+      <div class="seg2" role="group" aria-label="مشتري ولا مالك">
+        <button type="button" class="segbtn" data-role="شراء" aria-pressed="true">مشتري <small>عايز يشتري</small></button>
+        <button type="button" class="segbtn" data-role="تسويق" aria-pressed="false">مالك <small>عايز يبيع</small></button>
+      </div>
+      <input type="hidden" id="fPurpose" value="شراء">
       <div class="grid">
-        <label class="wide">لينك البوست
-          <input id="fLink" type="url" placeholder="https://www.facebook.com/groups/…" inputmode="url">
+        <label>اسم العميل
+          <input id="fName" maxlength="60" placeholder="الاسم" autocomplete="off">
         </label>
-        <label class="wide">الجروب أو المصدر
-          <input id="fSource" list="sources" placeholder="مثلًا: عقارات بني سويف الجديدة">
+        <label>الموبايل / واتساب
+          <input id="fPhone" type="tel" inputmode="tel" maxlength="16" placeholder="01xxxxxxxxx" dir="ltr">
+        </label>
+        <label class="wide">مصدر العميل
+          <input id="fSource" list="sources" placeholder="مكالمة، زيارة المكتب، ترشيح، جروب…">
           <datalist id="sources"></datalist>
         </label>
-        <label>المحافظة / المنطقة
+        <label>الحي
           <input id="fArea" list="areas" required placeholder="اختار أو اكتب">
           <datalist id="areas"></datalist>
         </label>
@@ -229,10 +242,10 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
             <option>شقة</option><option>أرض</option><option>فيلا</option>
           </select>
         </label>
-        <label>مشتري ولا مالك
-          <select id="fPurpose"><option value="شراء">مشتري (عايز يشتري)</option><option value="تسويق">مالك (عايز يبيع)</option></select>
+        <label>المساحة (م²)
+          <input id="fSize" inputmode="numeric" maxlength="6" placeholder="مثلًا 150">
         </label>
-        <label>الميزانية / السعر (جنيه)
+        <label><span id="fBudgetLabel">الميزانية</span> (جنيه)
           <input id="fBudget" inputmode="decimal" placeholder="مثلًا 1.5 مليون أو 800000">
         </label>
         <label>طريقة الدفع
@@ -243,12 +256,22 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
         <label>متابعة يوم
           <input id="fFollow" type="date">
         </label>
-        <label class="wide">تفاصيل الطلب
-          <textarea id="fNote" rows="1" placeholder="3 غرف، دور متوسط، قريب من الكورنيش…"></textarea>
+        <label class="wide">ملاحظات
+          <textarea id="fNote" rows="2" placeholder="عدد الغرف، الدور، رقم القطعة، اللي اتقال في المكالمة…"></textarea>
         </label>
       </div>
+      <details class="frompost" id="fromPost">
+        <summary>جاي من بوست فيسبوك؟ الصقه هنا والخانات تتملا لوحدها</summary>
+        <label class="paste">نص البوست + اللينك
+          <textarea id="fPaste" rows="3" placeholder="مثال: مطلوب شقة في الحي الثالث 3 غرف في حدود 1.5 مليون كاش https://www.facebook.com/groups/..."></textarea>
+        </label>
+        <div class="chips" id="pasteHits" aria-live="polite"></div>
+        <label>لينك البوست
+          <input id="fLink" type="url" placeholder="https://www.facebook.com/groups/…" inputmode="url" dir="ltr">
+        </label>
+      </details>
       <div class="row-actions">
-        <button class="btn" id="saveBtn" type="submit">حفظ الطلب</button>
+        <button class="btn" id="saveBtn" type="submit">حفظ العميل</button>
         <button class="btn ghost" id="cancelEdit" type="button" hidden>إلغاء التعديل</button>
         <span class="msg" id="formMsg" role="status"></span>
       </div>
@@ -349,7 +372,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   function fillLists(){
     const areas=[...new Set([...AREAS,...rows.map(r=>r.area).filter(Boolean)])];
     $("areas").innerHTML=areas.map(a=>`<option value="${esc(a)}">`).join("");
-    const src=[...new Set(rows.map(r=>r.source).filter(Boolean))];
+    const src=[...new Set(["مكالمة","زيارة المكتب","واتساب","ترشيح من عميل","جروب فيسبوك","صفحة العراب",...rows.map(r=>r.source).filter(Boolean)])];
     $("sources").innerHTML=src.map(a=>`<option value="${esc(a)}">`).join("");
     const keepA=$("qArea").value, keepT=$("qType").value;
     const usedA=[...new Set(rows.map(r=>r.area).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"ar"));
@@ -361,8 +384,19 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
   function safeUrl(u){try{const x=new URL(u);return /^https?:$/.test(x.protocol)?x.href:""}catch(e){return ""}}
 
+  function normPhone(v){
+    let p=String(v||"").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[^\d+]/g,"");
+    if(p.startsWith("+20"))p="0"+p.slice(3);else if(p.startsWith("0020"))p="0"+p.slice(4);else if(p.startsWith("20")&&p.length===12)p="0"+p.slice(2);
+    return /^01[0125]\d{8}$/.test(p)?p:null;
+  }
+  function syncRole(){
+    const own=$("fPurpose").value==="تسويق";
+    document.querySelectorAll(".segbtn").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.role===$("fPurpose").value)));
+    $("fBudgetLabel").textContent=own?"السعر المطلوب":"الميزانية";
+  }
+  document.querySelectorAll(".segbtn").forEach(b=>b.addEventListener("click",()=>{$("fPurpose").value=b.dataset.role;syncRole()}));
   function resetForm(){
-    $("form").reset(); $("fTerm").hidden=true; editing=null; $("saveBtn").textContent="حفظ الطلب"; $("cancelEdit").hidden=true;
+    $("form").reset(); $("fPurpose").value="شراء"; syncRole(); $("fTerm").hidden=true; $("fromPost").open=false; delete $("saveBtn").dataset.dupOk; editing=null; $("saveBtn").textContent="حفظ العميل"; $("cancelEdit").hidden=true;
   }
   $("fPay").addEventListener("change",()=>{$("fTerm").hidden=$("fPay").value!=="تقسيط";if($("fPay").value!=="تقسيط")$("fTerm").value=""});
   $("cancelEdit").onclick=()=>{resetForm();$("formMsg").textContent=""};
@@ -373,7 +407,15 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     if(!area){$("formMsg").textContent="اكتب المنطقة";$("formMsg").className="msg err";return}
     const link=$("fLink").value.trim();
     if(link&&!safeUrl(link)){$("formMsg").textContent="اللينك لازم يبدأ بـ https://";$("formMsg").className="msg err";return}
+    const phoneRaw=$("fPhone").value.trim(), phone=normPhone(phoneRaw);
+    if(phoneRaw&&!phone){$("formMsg").textContent="رقم الموبايل لازم يكون 11 رقم ويبدأ بـ 01";$("formMsg").className="msg err";$("fPhone").focus();return}
+    if(phone&&!editing&&$("saveBtn").dataset.dupOk!==phone){
+      const d=rows.find(r=>r.phone===phone);
+      if(d){$("saveBtn").dataset.dupOk=phone;$("formMsg").textContent=`الرقم ده متسجل قبل كده${d.name?" باسم "+d.name:""} (${d.purpose==="تسويق"?"مالك":"مشتري"} · ${d.type} · ${d.area}). اضغط حفظ تاني لو ده طلب جديد ليه.`;$("formMsg").className="msg err";return}
+    }
+    const sizeV=parseInt(String($("fSize").value).replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[^\d]/g,""),10);
     const rec={
+      name:$("fName").value.trim()||null, phone:phone||null, size:isFinite(sizeV)&&sizeV>0?sizeV:null,
       link, source:$("fSource").value.trim(), area, type:$("fType").value, purpose:$("fPurpose").value,
       budget:parseBudget($("fBudget").value), pay:$("fPay").value==="تقسيط"&&$("fTerm").value.trim()?"تقسيط - "+$("fTerm").value.trim():$("fPay").value, followUp:$("fFollow").value||"",
       note:$("fNote").value.trim()
@@ -471,6 +513,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
         ${matchBlock(r)}
         <div class="meta">
           ${r.budget?`<span>${r.purpose==="تسويق"?"السعر":"الميزانية"}: <span class="budget">${fmtBudget(r.budget)}</span>${r.pay?` · ${esc(r.pay)}`:""}</span>`:r.pay?`<span>${esc(r.pay)}</span>`:""}
+          ${r.size?`<span>المساحة: <b class="budget">${Number(r.size).toLocaleString("ar-EG")} م²</b></span>`:""}
           ${r.source?`<span>المصدر: ${esc(r.source)}</span>`:""}
           ${r.name?`<span>الاسم: ${esc(r.name)}</span>`:""}
           ${r.createdAt?`<span>اتسجل ${new Date(r.createdAt).toLocaleDateString("ar-EG",{day:"numeric",month:"short"})}</span>`:""}
@@ -523,7 +566,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     const it=b.closest(".item"), id=it.dataset.id, r=rows.find(x=>x.id===id); if(!r)return;
     if(b.dataset.act==="edit"){
       editing=id; $("fLink").value=r.link||""; $("fSource").value=r.source||""; $("fArea").value=r.area||"";
-      $("fType").value=r.type||"شقة"; $("fPurpose").value=r.purpose||"شراء"; $("fBudget").value=r.budget||"";
+      $("fName").value=r.name||""; $("fPhone").value=r.phone||""; $("fSize").value=r.size||""; $("fromPost").open=!!r.link;
+      $("fType").value=r.type||"شقة"; $("fPurpose").value=r.purpose||"شراء"; syncRole(); $("fBudget").value=r.budget||"";
       {const pp=r.pay||"";$("fPay").value=pp.startsWith("تقسيط")?"تقسيط":pp;$("fTerm").value=pp.startsWith("تقسيط - ")?pp.slice(8):"";$("fTerm").hidden=!pp.startsWith("تقسيط")} $("fFollow").value=r.followUp||""; $("fNote").value=r.note||"";
       $("saveBtn").textContent="حفظ التعديل"; $("cancelEdit").hidden=false; $("formMsg").textContent="";
       $("form").scrollIntoView({behavior:"smooth",block:"start"}); return;
@@ -546,6 +590,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   function parsePost(raw){
     const out={}, t=norm(raw);
     const link=(raw.match(/https?:\/\/[^\s"'<>]+/)||[])[0]; if(link)out.link=link;
+    const ph=normPhone((t.replace(/[\s-]/g,"").match(/(?:\+?20|0020)?01[0125]\d{8}/)||[])[0]); if(ph)out.phone=ph;
+    const sz=t.match(/(\d{2,5})\s*(متر|م2|م²|مترمربع)/); if(sz)out.size=+sz[1];
     for(const [re,v] of AREA_RULES){if(re.test(t)){out.area=v;break}}
     for(const [re,v] of TYPE_RULES){if(re.test(t)){out.type=v;break}}
     if(/مطلوب|عايز|عاوز|محتاج|ادور|بدور|اشتري|للشراء/.test(t))out.purpose="شراء"; else if(/للبيع|بيع|من المالك|عندي|املك|تمليك/.test(t))out.purpose="تسويق";
@@ -561,12 +607,12 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     if(note)out.note=note.slice(0,300);
     return out;
   }
-  const NAMES={link:"اللينك",area:"المنطقة",type:"النوع",purpose:"مشتري/مالك",pay:"الدفع",budget:"الميزانية",note:"التفاصيل"};
+  const NAMES={phone:"الموبايل",size:"المساحة",link:"اللينك",area:"المنطقة",type:"النوع",purpose:"مشتري/مالك",pay:"الدفع",budget:"الميزانية",note:"التفاصيل"};
   function applyPaste(){
     const p=parsePost($("fPaste").value), hits=[];
     const set=(id,v,k,label)=>{if(v==null||v==="")return;const el=$(id);el.value=v;el.classList.add("filled");setTimeout(()=>el.classList.remove("filled"),1600);hits.push(`${NAMES[k]}: ${label??v}`)};
     set("fLink",p.link,"link","✓"); set("fArea",p.area,"area"); set("fType",p.type,"type");
-    set("fPurpose",p.purpose,"purpose"); set("fPay",p.pay,"pay"); if(p.pay==="تقسيط"){$("fTerm").hidden=false;if(p.term)set("fTerm",p.term,"pay","مدة "+p.term)}
+    set("fPurpose",p.purpose,"purpose"); syncRole(); set("fPhone",p.phone,"phone"); set("fSize",p.size,"size",p.size?p.size+" م²":null); set("fPay",p.pay,"pay"); if(p.pay==="تقسيط"){$("fTerm").hidden=false;if(p.term)set("fTerm",p.term,"pay","مدة "+p.term)}
     if(p.budget)set("fBudget",p.budget,"budget",fmtBudget(p.budget));
     set("fNote",p.note,"note","✓");
     if(!$("fFollow").value){const d=new Date(Date.now()+864e5);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());$("fFollow").value=d.toISOString().slice(0,10)}
