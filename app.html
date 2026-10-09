@@ -113,13 +113,18 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .role{font-size:12.5px;font-weight:700;border-radius:6px;padding:1px 8px;color:#fff}
 .role.buy{background:#2F5D8A}
 .role.own{background:var(--accent)}
+.role.mkt{background:#6B4E8A}
 .bwtoggle{display:flex!important;align-items:center;gap:8px;font-size:15px;color:var(--ink);margin-bottom:12px;cursor:pointer}
 .bwtoggle input{width:18px;height:18px;accent-color:var(--accent)}
 .bwbox{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;background:var(--accent-soft);border-radius:10px;padding:10px}
 @media (max-width:760px){.bwbox{grid-template-columns:1fr 1fr}}
 .overrow{display:flex;gap:6px}.overrow input{flex:1;min-width:0}.overrow select{width:auto}
 .bwtag{background:var(--ink)!important;color:var(--gold)!important;font-weight:700}
-.seg2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.pastebox{background:var(--accent-soft);border:2px dashed color-mix(in srgb,var(--accent) 55%,transparent);border-radius:12px;padding:12px;margin-bottom:14px;display:grid;gap:6px}
+.pastebox .pastetitle{font-weight:700;font-size:16px;color:var(--ink)}
+.pastebox .msg{margin:0;font-size:13px}
+.pastebox textarea{min-height:96px;background:var(--surface);border-style:solid}
+.seg2{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
 .segbtn{font:inherit;font-weight:700;font-size:16px;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
 .segbtn small{font-weight:400;font-size:12.5px;color:var(--muted);margin-inline-start:4px}
 .segbtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
@@ -156,6 +161,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 /* ===== phone ===== */
 .bar .fill{display:block}
 @media (max-width:640px){
+  .segbtn{padding:8px 4px;font-size:15px}
+  .segbtn small{display:block;margin:2px 0 0}
   .wrap{padding:12px 12px 32px;gap:14px}
   .brand{padding:14px;gap:10px 12px;border-radius:12px}
   .brand img{width:58px}
@@ -223,9 +230,17 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   <section class="panel" aria-labelledby="addH">
     <h2 id="addH">تسجيل عميل</h2>
     <form id="form" autocomplete="off" style="margin-top:12px">
+      <div class="pastebox">
+        <label for="fPaste" class="pastetitle">الصق التفاصيل اللي جاتلك هنا</label>
+        <p class="msg">رسالة واتساب، بوست، أو أي كلام فيه تفاصيل عقار. الخانات كلها هتتملا لوحدها، تراجعها وتضغط حفظ.</p>
+        <textarea id="fPaste" rows="4" placeholder="مثال:&#10;قطعة أرض رقم 654 بيت وطن&#10;الحي الحداشر – المساحة 460 م&#10;مدفوع منها 11.500 الف دولار – مطلوب 1600 اوفر&#10;أ/ محمد 01012345678"></textarea>
+        <div class="chips" id="pasteHits" aria-live="polite"></div>
+        <button type="button" class="linkbtn" id="clearPaste" hidden>امسح وابدأ من جديد</button>
+      </div>
       <div class="seg2" role="group" aria-label="مشتري ولا مالك">
         <button type="button" class="segbtn" data-role="شراء" aria-pressed="true">مشتري <small>عايز يشتري</small></button>
         <button type="button" class="segbtn" data-role="تسويق" aria-pressed="false">مالك <small>عايز يبيع</small></button>
+        <button type="button" class="segbtn" data-role="مسوق" aria-pressed="false">مسوق <small>بيعرض لغيره</small></button>
       </div>
       <input type="hidden" id="fPurpose" value="شراء">
       <label class="bwtoggle"><input type="checkbox" id="fBW"> <span>قطعة أرض <b>بيت الوطن</b></span></label>
@@ -279,11 +294,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
         </label>
       </div>
       <details class="frompost" id="fromPost">
-        <summary>جاي من بوست فيسبوك؟ الصقه هنا والخانات تتملا لوحدها</summary>
-        <label class="paste">نص البوست + اللينك
-          <textarea id="fPaste" rows="3" placeholder="مثال: مطلوب شقة في الحي الثالث 3 غرف في حدود 1.5 مليون كاش https://www.facebook.com/groups/..."></textarea>
-        </label>
-        <div class="chips" id="pasteHits" aria-live="polite"></div>
+        <summary>لينك البوست (لو جاي من فيسبوك)</summary>
         <label>لينك البوست
           <input id="fLink" type="url" placeholder="https://www.facebook.com/groups/…" inputmode="url" dir="ltr">
         </label>
@@ -318,7 +329,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
       <label class="q">بحث<input id="qText" placeholder="كلمة في التفاصيل أو الجروب"></label>
       <label>المنطقة<select id="qArea"><option value="">الكل</option></select></label>
       <label>المشروع<select id="qProj"><option value="">الكل</option><option value="bw">بيت الوطن</option><option value="no">غير بيت الوطن</option></select></label>
-      <label>مشتري / مالك<select id="qRole"><option value="">الكل</option><option value="شراء">مشترين</option><option value="تسويق">ملاك</option></select></label>
+      <label>مشتري / مالك<select id="qRole"><option value="">الكل</option><option value="شراء">مشترين</option><option value="تسويق">ملاك</option><option value="مسوق">مسوقين</option></select></label>
       <label>النوع<select id="qType"><option value="">الكل</option></select></label>
       <label>الترتيب<select id="qSort"><option value="new">الأحدث</option><option value="follow">أقرب متابعة</option><option value="budget">الميزانية الأعلى</option><option value="match">أكتر مطابقات</option></select></label>
     </div>
@@ -409,7 +420,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     return /^01[0125]\d{8}$/.test(p)?p:null;
   }
   function syncRole(){
-    const own=$("fPurpose").value==="تسويق";
+    const own=$("fPurpose").value==="تسويق"||$("fPurpose").value==="مسوق";
     document.querySelectorAll(".segbtn").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.role===$("fPurpose").value)));
     $("fBudgetLabel").textContent=own?"السعر المطلوب":"الميزانية";
     const bw=$("fBW").checked;
@@ -436,7 +447,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     if(phoneRaw&&!phone){$("formMsg").textContent="رقم الموبايل لازم يكون 11 رقم ويبدأ بـ 01";$("formMsg").className="msg err";$("fPhone").focus();return}
     if(phone&&!editing&&$("saveBtn").dataset.dupOk!==phone){
       const d=rows.find(r=>r.phone===phone);
-      if(d){$("saveBtn").dataset.dupOk=phone;$("formMsg").textContent=`الرقم ده متسجل قبل كده${d.name?" باسم "+d.name:""} (${d.purpose==="تسويق"?"مالك":"مشتري"} · ${d.type} · ${d.area}). اضغط حفظ تاني لو ده طلب جديد ليه.`;$("formMsg").className="msg err";return}
+      if(d){$("saveBtn").dataset.dupOk=phone;$("formMsg").textContent=`الرقم ده متسجل قبل كده${d.name?" باسم "+d.name:""} (${roleName(d)} · ${d.type} · ${d.area}). اضغط حفظ تاني لو ده طلب جديد ليه.`;$("formMsg").className="msg err";return}
     }
     const sizeV=parseInt(String($("fSize").value).replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[^\d]/g,""),10);
     const bw=$("fBW").checked, num=v=>{const n=parseFloat(String(v||"").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[,،\s]/g,""));return isFinite(n)&&n>0?n:null};
@@ -456,7 +467,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     try{
       if(editing){await store.update(editing,rec);$("formMsg").textContent="اتعدّل"}
       else{await store.add({...rec,status:"new",createdAt:new Date().toISOString()});$("formMsg").textContent="اتحفظ"}
-      $("formMsg").className="msg"; resetForm(); $("pasteHits").innerHTML=""; $("fPaste").focus();
+      $("formMsg").className="msg"; resetForm(); $("fPaste").value=""; $("clearPaste").hidden=true; $("pasteHits").innerHTML=""; $("fPaste").focus();
     }catch(err){
       $("formMsg").className="msg err";
       $("formMsg").textContent=err&&err.code==="quota_exceeded"?"المساحة امتلأت، احذف طلبات قديمة":"ما اتحفظش، جرّب تاني";
@@ -472,7 +483,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   }
   /* ---------- matching buyers <-> owners ---------- */
   const isOpen=r=>r.status!=="closed"&&r.status!=="deal";
-  const isOwn=r=>r.purpose==="تسويق";
+  const isOwn=r=>r.purpose==="تسويق"||r.purpose==="مسوق";
+  function roleName(r){return r.purpose==="مسوق"?"مسوق":r.purpose==="تسويق"?"مالك":"مشتري"}
   const isBW=r=>r.project==="بيت الوطن";
   function priceOk(buyer,owner){
     if(isBW(buyer)){
@@ -499,11 +511,11 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     matchMap=buildMatches();
     const active=rows.filter(r=>r.status!=="closed");
     const wk=Date.now()-7*864e5;
-    const recent=rows.filter(r=>Date.parse(r.createdAt||0)>=wk), nOwn=recent.filter(r=>r.purpose==="تسويق").length;
-    $("sWeek").textContent=`${(recent.length-nOwn).toLocaleString("ar-EG")} مشتري · ${nOwn.toLocaleString("ar-EG")} مالك`;
+    const recent=rows.filter(r=>Date.parse(r.createdAt||0)>=wk), nOwn=recent.filter(isOwn).length;
+    $("sWeek").textContent=`${(recent.length-nOwn).toLocaleString("ar-EG")} مشتري · ${nOwn.toLocaleString("ar-EG")} عرض`;
     $("sDue").textContent=rows.filter(r=>followState(r)).length.toLocaleString("ar-EG");
     const byArea={},byType={};
-    const buyers=active.filter(r=>r.purpose!=="تسويق");
+    const buyers=active.filter(r=>!isOwn(r));
     buyers.forEach(r=>{byArea[r.area]=(byArea[r.area]||0)+1;byType[r.type]=(byType[r.type]||0)+1});
     const top=Object.entries(byArea).sort((a,b)=>b[1]-a[1])[0];
     $("sArea").textContent=top?top[0]:"—"; $("sArea").style.fontSize=top&&top[0].length>12?"18px":"";
@@ -519,7 +531,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 
     const q=$("qText").value.trim(), qa=$("qArea").value, qt=$("qType").value, sort=$("qSort").value;
     const qr=$("qRole").value, qp=$("qProj").value;
-    let list=rows.filter(r=>(!qp||(qp==="bw")===(r.project==="بيت الوطن"))&&(!statusFilter||(statusFilter==="__match"?(matchMap.get(r.id)||[]).length>0:r.status===statusFilter))&&(!qr||(qr==="تسويق")===(r.purpose==="تسويق"))&&(!qa||r.area===qa)&&(!qt||r.type===qt)
+    let list=rows.filter(r=>(!qp||(qp==="bw")===(r.project==="بيت الوطن"))&&(!statusFilter||(statusFilter==="__match"?(matchMap.get(r.id)||[]).length>0:r.status===statusFilter))&&(!qr||r.purpose===qr)&&(!qa||r.area===qa)&&(!qt||r.type===qt)
       &&(!q||[r.note,r.source,r.area,r.name,r.phone].join(" ").includes(q)));
     list.sort((a,b)=>{
       if(sort==="follow")return (a.followUp||"9999").localeCompare(b.followUp||"9999");
@@ -536,9 +548,9 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
       const dis=canWrite?"":" disabled";
       return `<article class="item ${fs}" data-id="${esc(r.id)}">
         <div class="top">
-          <span class="role ${r.purpose==="تسويق"?"own":"buy"}">${r.purpose==="تسويق"?"مالك":"مشتري"}</span>
+          <span class="role ${r.purpose==="مسوق"?"mkt":isOwn(r)?"own":"buy"}">${roleName(r)}</span>
           ${r.project==="بيت الوطن"?`<span class="tag bwtag">بيت الوطن${r.plot_no?" · قطعة "+esc(r.plot_no):""}</span>`:""}
-          <span class="title">${r.purpose==="تسويق"?`${esc(r.type)} للبيع`:`مطلوب ${esc(r.type)}`} · ${esc(r.area)}</span>
+          <span class="title">${isOwn(r)?`${esc(r.type)} للبيع`:`مطلوب ${esc(r.type)}`} · ${esc(r.area)}</span>
           <span class="tag ${st.c}">${st.t}</span>
           ${fs==="late"?`<span class="tag late">متابعة متأخرة</span>`:fs==="due"?`<span class="tag due">متابعة النهارده</span>`:""}
           ${r.example?`<span class="tag ex">مثال</span>`:""}
@@ -546,9 +558,9 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
         ${r.note?`<p class="note">${esc(r.note)}</p>`:""}
         ${matchBlock(r)}
         <div class="meta">
-          ${r.budget?`<span>${r.purpose==="تسويق"?"السعر":"الميزانية"}: <span class="budget">${fmtBudget(r.budget)}</span>${r.pay?` · ${esc(r.pay)}`:""}</span>`:r.pay?`<span>${esc(r.pay)}</span>`:""}
+          ${r.budget?`<span>${isOwn(r)?"السعر":"الميزانية"}: <span class="budget">${fmtBudget(r.budget)}</span>${r.pay?` · ${esc(r.pay)}`:""}</span>`:r.pay?`<span>${esc(r.pay)}</span>`:""}
           ${r.paid_usd?`<span>المدفوع: <b class="budget">${Number(r.paid_usd).toLocaleString("en-US")} $</b></span>`:""}
-          ${r.over_amount?`<span>${r.purpose==="تسويق"?"الأوفر":"أقصى أوفر"}: <b class="budget">${Number(r.over_amount).toLocaleString("en-US")} ${r.over_currency==="جنيه"?"ج":"$"}</b></span>`:""}
+          ${r.over_amount?`<span>${isOwn(r)?"الأوفر":"أقصى أوفر"}: <b class="budget">${Number(r.over_amount).toLocaleString("en-US")} ${r.over_currency==="جنيه"?"ج":"$"}</b></span>`:""}
           ${r.size?`<span>المساحة: <b class="budget">${Number(r.size).toLocaleString("ar-EG")} م²</b></span>`:""}
           ${r.source?`<span>المصدر: ${esc(r.source)}</span>`:""}
           ${r.name?`<span>الاسم: ${esc(r.name)}</span>`:""}
@@ -572,7 +584,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     return `<details class="match" data-id="${esc(r.id)}"${openMatches.has(r.id)?" open":""}>
       <summary><span class="dot" aria-hidden="true"></span>${label} <small>نفس الحي والنوع${r.budget?" والسعر قريب":""}</small></summary>
       <ul>${m.slice(0,8).map(x=>`<li>
-        <span class="role ${isOwn(x)?"own":"buy"}">${isOwn(x)?"مالك":"مشتري"}</span>
+        <span class="role ${x.purpose==="مسوق"?"mkt":isOwn(x)?"own":"buy"}">${roleName(x)}</span>
         <span class="mx">${x.name?esc(x.name):"بدون اسم"}${x.budget?` · <b class="budget">${fmtBudget(x.budget)}</b>`:""}${x.pay?` · ${esc(x.pay)}`:""}</span>
         <span class="mlinks">${/^01\d{9}$/.test(x.phone||"")?`<a href="https://wa.me/2${esc(x.phone)}" target="_blank" rel="noopener">واتساب</a>`:""}${safeUrl(x.link)?`<a href="${esc(safeUrl(x.link))}" target="_blank" rel="noopener">البوست</a>`:""}<button type="button" class="linkbtn" data-act="goto" data-target="${esc(x.id)}">افتح الكارت</button></span>
       </li>`).join("")}</ul>
@@ -627,6 +639,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   function parsePost(raw){
     const out={}, t=norm(raw);
     const link=(raw.match(/https?:\/\/[^\s"'<>]+/)||[])[0]; if(link)out.link=link;
+    const nm=String(raw).match(/(?:الاسم|اسم المالك|اسم العميل|المالك|العميل)\s*[:：\-]?\s*([^\n\d:،,]{2,30})/)||String(raw).match(/(?:^|\n|\s)(?:أ\/|ا\/|أ\.|م\/|د\/|الأستاذ|الاستاذ|أستاذ|استاذ|الحاج|حاج)\s*([^\n\d:،,]{2,25})/);
+    if(nm){const v=nm[1].trim().split(/\s+/).slice(0,3).join(" ");if(v&&!/بيت|وطن|الحي|قطعه|قطعة|متر|مطلوب|للبيع/.test(v))out.name=v}
     const ph=normPhone((t.replace(/[\s-]/g,"").match(/(?:\+?20|0020)?01[0125]\d{8}/)||[])[0]); if(ph)out.phone=ph;
     const sz=t.match(/(\d{2,5})\s*(متر|م2|م²|م(?=\s|$|\n))/); if(sz)out.size=+sz[1];
     if(/بيت (ال)?وطن/.test(t)){
@@ -649,18 +663,19 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     else if(/مليونين/.test(clean))out.budget=2e6;
     else if(/(^|\s)مليون/.test(clean))out.budget=1e6;
     else if(!out.bw){const big=(clean.match(/\b\d{4,8}\b/g)||[]).map(Number).filter(v=>v>=3000);if(big.length)out.budget=Math.max(...big)}
+    if(out.purpose!=="شراء"&&/موكل|موكلين|لعميل عندي|عملاء عندي|مسوق|سمسار|لو قدامك حد|حد ليها|حد ليهم/.test(t))out.purpose="مسوق";
     const note=String(raw).replace(/https?:\/\/[^\s]+/g,"").replace(/(\+?2)?0?1[0125][\s-]?\d{3,4}[\s-]?\d{4}/g,"").replace(/[٠-٩]{11}/g,"").replace(/\s+/g," ").trim();
     if(note)out.note=note.slice(0,300);
     return out;
   }
-  const NAMES={plot:"رقم القطعة",paid:"المدفوع",over:"الأوفر",phone:"الموبايل",size:"المساحة",link:"اللينك",area:"المنطقة",type:"النوع",purpose:"مشتري/مالك",pay:"الدفع",budget:"الميزانية",note:"التفاصيل"};
+  const NAMES={name:"الاسم",plot:"رقم القطعة",paid:"المدفوع",over:"الأوفر",phone:"الموبايل",size:"المساحة",link:"اللينك",area:"المنطقة",type:"النوع",purpose:"مشتري/مالك",pay:"الدفع",budget:"الميزانية",note:"التفاصيل"};
   function applyPaste(){
     const p=parsePost($("fPaste").value), hits=[];
     const set=(id,v,k,label)=>{if(v==null||v==="")return;const el=$(id);el.value=v;el.classList.add("filled");setTimeout(()=>el.classList.remove("filled"),1600);hits.push(`${NAMES[k]}: ${label??v}`)};
     if(p.bw){$("fBW").checked=true;hits.push("بيت الوطن")}
     set("fLink",p.link,"link","✓"); set("fArea",p.area,"area"); set("fType",p.type,"type");
     set("fPlot",p.plot,"plot"); set("fPaid",p.paid,"paid",p.paid?p.paid.toLocaleString("en-US")+" $":null); set("fOver",p.over,"over",p.over?p.over.toLocaleString("en-US")+(p.overCur==="جنيه"?" ج":" $"):null); if(p.overCur)$("fOverCur").value=p.overCur;
-    set("fPurpose",p.purpose,"purpose"); syncRole(); set("fPhone",p.phone,"phone"); set("fSize",p.size,"size",p.size?p.size+" م²":null); set("fPay",p.pay,"pay"); if(p.pay==="تقسيط"){$("fTerm").hidden=false;if(p.term)set("fTerm",p.term,"pay","مدة "+p.term)}
+    set("fPurpose",p.purpose,"purpose"); syncRole(); set("fName",p.name,"name"); set("fPhone",p.phone,"phone"); set("fSize",p.size,"size",p.size?p.size+" م²":null); set("fPay",p.pay,"pay"); if(p.pay==="تقسيط"){$("fTerm").hidden=false;if(p.term)set("fTerm",p.term,"pay","مدة "+p.term)}
     if(p.budget)set("fBudget",p.budget,"budget",fmtBudget(p.budget));
     set("fNote",p.note,"note","✓");
     if(!$("fFollow").value){const d=new Date(Date.now()+864e5);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());$("fFollow").value=d.toISOString().slice(0,10)}
@@ -678,7 +693,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     let ok=0;
     for(const p of bulkParts){
       try{await store.add({project:p.bw?"بيت الوطن":null,plot_no:p.plot||null,paid_usd:p.paid||null,over_amount:p.over||null,over_currency:p.over?(p.overCur||"دولار"):null,
-        name,phone:phone||null,size:p.size||null,source:src,area:p.area||"غير محدد",type:p.type||"أرض",purpose:p.purpose||"تسويق",
+        name,phone:phone||null,size:p.size||null,source:src,area:p.area||"غير محدد",type:p.type||"أرض",purpose:$("fPurpose").value==="مسوق"?"مسوق":(p.purpose||"تسويق"),
         budget:p.bw?null:(p.budget||null),pay:p.pay||"",followUp:fu,note:p.note||"",link:"",status:"new",createdAt:new Date().toISOString()});ok++}catch(err){}
     }
     $("formMsg").className="msg"; $("formMsg").textContent=`اتسجّل ${ok} من ${bulkParts.length}`;
@@ -686,7 +701,10 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   });
   window.radarPaste=t=>{$("fPaste").value=t;applyPaste();$("form").scrollIntoView({block:"start"})};
   let pasteT=null;
-  $("fPaste").addEventListener("input",()=>{clearTimeout(pasteT);pasteT=setTimeout(applyPaste,250)});
+  function clearFields(){const keep=$("fPaste").value;const ed=editing;resetForm();editing=ed;if(ed){$("saveBtn").textContent="حفظ التعديل";$("cancelEdit").hidden=false}$("fPaste").value=keep}
+  $("fPaste").addEventListener("paste",()=>{setTimeout(()=>{if(!editing)clearFields();applyPaste();$("clearPaste").hidden=false},0)});
+  $("fPaste").addEventListener("input",e=>{if(e.inputType==="insertFromPaste")return;clearTimeout(pasteT);pasteT=setTimeout(()=>{applyPaste();$("clearPaste").hidden=!$("fPaste").value},300)});
+  $("clearPaste").addEventListener("click",()=>{resetForm();$("fPaste").value="";$("pasteHits").innerHTML="";$("clearPaste").hidden=true;$("fPaste").focus()});
   $("fSource").addEventListener("change",()=>{try{localStorage.setItem("radar-last-source",$("fSource").value)}catch(e){}});
 
   /* ---------- quick Facebook search links ---------- */
