@@ -113,6 +113,12 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .role{font-size:12.5px;font-weight:700;border-radius:6px;padding:1px 8px;color:#fff}
 .role.buy{background:#2F5D8A}
 .role.own{background:var(--accent)}
+.bwtoggle{display:flex!important;align-items:center;gap:8px;font-size:15px;color:var(--ink);margin-bottom:12px;cursor:pointer}
+.bwtoggle input{width:18px;height:18px;accent-color:var(--accent)}
+.bwbox{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;background:var(--accent-soft);border-radius:10px;padding:10px}
+@media (max-width:760px){.bwbox{grid-template-columns:1fr 1fr}}
+.overrow{display:flex;gap:6px}.overrow input{flex:1;min-width:0}.overrow select{width:auto}
+.bwtag{background:var(--ink)!important;color:var(--gold)!important;font-weight:700}
 .seg2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
 .segbtn{font:inherit;font-weight:700;font-size:16px;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
 .segbtn small{font-weight:400;font-size:12.5px;color:var(--muted);margin-inline-start:4px}
@@ -222,7 +228,19 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
         <button type="button" class="segbtn" data-role="تسويق" aria-pressed="false">مالك <small>عايز يبيع</small></button>
       </div>
       <input type="hidden" id="fPurpose" value="شراء">
+      <label class="bwtoggle"><input type="checkbox" id="fBW"> <span>قطعة أرض <b>بيت الوطن</b></span></label>
       <div class="grid">
+        <div class="bwbox full" id="bwBox" hidden>
+          <label>رقم القطعة
+            <input id="fPlot" maxlength="12" inputmode="numeric" placeholder="مثلًا 654">
+          </label>
+          <label id="fPaidWrap">المدفوع منها ($ دولار)
+            <input id="fPaid" inputmode="decimal" maxlength="12" placeholder="مثلًا 11500">
+          </label>
+          <label><span id="fOverLabel">الأوفر المطلوب</span>
+            <span class="overrow"><input id="fOver" inputmode="decimal" maxlength="12" placeholder="مثلًا 1600"><select id="fOverCur" aria-label="عملة الأوفر"><option>دولار</option><option>جنيه</option></select></span>
+          </label>
+        </div>
         <label>اسم العميل
           <input id="fName" maxlength="60" placeholder="الاسم" autocomplete="off">
         </label>
@@ -245,10 +263,10 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
         <label>المساحة (م²)
           <input id="fSize" inputmode="numeric" maxlength="6" placeholder="مثلًا 150">
         </label>
-        <label><span id="fBudgetLabel">الميزانية</span> (جنيه)
+        <label class="nobw"><span id="fBudgetLabel">الميزانية</span> (جنيه)
           <input id="fBudget" inputmode="decimal" placeholder="مثلًا 1.5 مليون أو 800000">
         </label>
-        <label>طريقة الدفع
+        <label class="nobw">طريقة الدفع
           <select id="fPay"><option value="">غير محدد</option><option>كاش</option><option>تقسيط</option></select>
           <input id="fTerm" list="terms" maxlength="30" placeholder="مدة التقسيط" hidden style="margin-top:6px">
           <datalist id="terms"><option value="6 شهور"><option value="سنة"><option value="سنتين"><option value="3 سنين"></datalist>
@@ -299,6 +317,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     <div class="filters">
       <label class="q">بحث<input id="qText" placeholder="كلمة في التفاصيل أو الجروب"></label>
       <label>المنطقة<select id="qArea"><option value="">الكل</option></select></label>
+      <label>المشروع<select id="qProj"><option value="">الكل</option><option value="bw">بيت الوطن</option><option value="no">غير بيت الوطن</option></select></label>
       <label>مشتري / مالك<select id="qRole"><option value="">الكل</option><option value="شراء">مشترين</option><option value="تسويق">ملاك</option></select></label>
       <label>النوع<select id="qType"><option value="">الكل</option></select></label>
       <label>الترتيب<select id="qSort"><option value="new">الأحدث</option><option value="follow">أقرب متابعة</option><option value="budget">الميزانية الأعلى</option><option value="match">أكتر مطابقات</option></select></label>
@@ -393,10 +412,16 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     const own=$("fPurpose").value==="تسويق";
     document.querySelectorAll(".segbtn").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.role===$("fPurpose").value)));
     $("fBudgetLabel").textContent=own?"السعر المطلوب":"الميزانية";
+    const bw=$("fBW").checked;
+    $("bwBox").hidden=!bw; document.querySelectorAll(".nobw").forEach(el=>el.hidden=bw);
+    $("fOverLabel").textContent=own?"الأوفر المطلوب":"أقصى أوفر يدفعه";
+    $("fPaidWrap").hidden=!own;
+    if(bw)$("fType").value="أرض";
   }
+  $("fBW").addEventListener("change",syncRole);
   document.querySelectorAll(".segbtn").forEach(b=>b.addEventListener("click",()=>{$("fPurpose").value=b.dataset.role;syncRole()}));
   function resetForm(){
-    $("form").reset(); $("fPurpose").value="شراء"; syncRole(); $("fTerm").hidden=true; $("fromPost").open=false; delete $("saveBtn").dataset.dupOk; editing=null; $("saveBtn").textContent="حفظ العميل"; $("cancelEdit").hidden=true;
+    $("form").reset(); $("fPurpose").value="شراء"; $("fBW").checked=false; syncRole(); $("fTerm").hidden=true; $("fromPost").open=false; delete $("saveBtn").dataset.dupOk; editing=null; $("saveBtn").textContent="حفظ العميل"; $("cancelEdit").hidden=true;
   }
   $("fPay").addEventListener("change",()=>{$("fTerm").hidden=$("fPay").value!=="تقسيط";if($("fPay").value!=="تقسيط")$("fTerm").value=""});
   $("cancelEdit").onclick=()=>{resetForm();$("formMsg").textContent=""};
@@ -414,7 +439,10 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
       if(d){$("saveBtn").dataset.dupOk=phone;$("formMsg").textContent=`الرقم ده متسجل قبل كده${d.name?" باسم "+d.name:""} (${d.purpose==="تسويق"?"مالك":"مشتري"} · ${d.type} · ${d.area}). اضغط حفظ تاني لو ده طلب جديد ليه.`;$("formMsg").className="msg err";return}
     }
     const sizeV=parseInt(String($("fSize").value).replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[^\d]/g,""),10);
+    const bw=$("fBW").checked, num=v=>{const n=parseFloat(String(v||"").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[,،\s]/g,""));return isFinite(n)&&n>0?n:null};
     const rec={
+      project:bw?"بيت الوطن":null, plot_no:bw?($("fPlot").value.trim()||null):null,
+      paid_usd:bw?num($("fPaid").value):null, over_amount:bw?num($("fOver").value):null, over_currency:bw&&num($("fOver").value)?$("fOverCur").value:null,
       name:$("fName").value.trim()||null, phone:phone||null, size:isFinite(sizeV)&&sizeV>0?sizeV:null,
       link, source:$("fSource").value.trim(), area, type:$("fType").value, purpose:$("fPurpose").value,
       budget:parseBudget($("fBudget").value), pay:$("fPay").value==="تقسيط"&&$("fTerm").value.trim()?"تقسيط - "+$("fTerm").value.trim():$("fPay").value, followUp:$("fFollow").value||"",
@@ -445,7 +473,12 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   /* ---------- matching buyers <-> owners ---------- */
   const isOpen=r=>r.status!=="closed"&&r.status!=="deal";
   const isOwn=r=>r.purpose==="تسويق";
+  const isBW=r=>r.project==="بيت الوطن";
   function priceOk(buyer,owner){
+    if(isBW(buyer)){
+      if(!buyer.over_amount||!owner.over_amount||(buyer.over_currency||"دولار")!==(owner.over_currency||"دولار"))return true;
+      return owner.over_amount<=buyer.over_amount*1.15;
+    }
     if(!buyer.budget||!owner.budget)return true;
     return owner.budget<=buyer.budget*1.15 && owner.budget>=buyer.budget*0.5;
   }
@@ -454,7 +487,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     for(const r of rows){
       if(!isOpen(r)){m.set(r.id,[]);continue}
       const own=isOwn(r);
-      const hits=open.filter(x=>x.id!==r.id&&isOwn(x)!==own&&x.area===r.area&&x.type===r.type&&(own?priceOk(x,r):priceOk(r,x)));
+      const hits=open.filter(x=>x.id!==r.id&&isOwn(x)!==own&&isBW(x)===isBW(r)&&x.area===r.area&&x.type===r.type&&(own?priceOk(x,r):priceOk(r,x)));
       hits.sort((a,b)=>Math.abs((a.budget||0)-(r.budget||0))-Math.abs((b.budget||0)-(r.budget||0)));
       m.set(r.id,hits);
     }
@@ -485,8 +518,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
       return `<button type="button" class="chip" data-s="${s.k}" aria-pressed="${statusFilter===s.k}">${s.t} · ${n.toLocaleString("ar-EG")}</button>`}).join("");
 
     const q=$("qText").value.trim(), qa=$("qArea").value, qt=$("qType").value, sort=$("qSort").value;
-    const qr=$("qRole").value;
-    let list=rows.filter(r=>(!statusFilter||(statusFilter==="__match"?(matchMap.get(r.id)||[]).length>0:r.status===statusFilter))&&(!qr||(qr==="تسويق")===(r.purpose==="تسويق"))&&(!qa||r.area===qa)&&(!qt||r.type===qt)
+    const qr=$("qRole").value, qp=$("qProj").value;
+    let list=rows.filter(r=>(!qp||(qp==="bw")===(r.project==="بيت الوطن"))&&(!statusFilter||(statusFilter==="__match"?(matchMap.get(r.id)||[]).length>0:r.status===statusFilter))&&(!qr||(qr==="تسويق")===(r.purpose==="تسويق"))&&(!qa||r.area===qa)&&(!qt||r.type===qt)
       &&(!q||[r.note,r.source,r.area,r.name,r.phone].join(" ").includes(q)));
     list.sort((a,b)=>{
       if(sort==="follow")return (a.followUp||"9999").localeCompare(b.followUp||"9999");
@@ -504,6 +537,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
       return `<article class="item ${fs}" data-id="${esc(r.id)}">
         <div class="top">
           <span class="role ${r.purpose==="تسويق"?"own":"buy"}">${r.purpose==="تسويق"?"مالك":"مشتري"}</span>
+          ${r.project==="بيت الوطن"?`<span class="tag bwtag">بيت الوطن${r.plot_no?" · قطعة "+esc(r.plot_no):""}</span>`:""}
           <span class="title">${r.purpose==="تسويق"?`${esc(r.type)} للبيع`:`مطلوب ${esc(r.type)}`} · ${esc(r.area)}</span>
           <span class="tag ${st.c}">${st.t}</span>
           ${fs==="late"?`<span class="tag late">متابعة متأخرة</span>`:fs==="due"?`<span class="tag due">متابعة النهارده</span>`:""}
@@ -513,6 +547,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
         ${matchBlock(r)}
         <div class="meta">
           ${r.budget?`<span>${r.purpose==="تسويق"?"السعر":"الميزانية"}: <span class="budget">${fmtBudget(r.budget)}</span>${r.pay?` · ${esc(r.pay)}`:""}</span>`:r.pay?`<span>${esc(r.pay)}</span>`:""}
+          ${r.paid_usd?`<span>المدفوع: <b class="budget">${Number(r.paid_usd).toLocaleString("en-US")} $</b></span>`:""}
+          ${r.over_amount?`<span>${r.purpose==="تسويق"?"الأوفر":"أقصى أوفر"}: <b class="budget">${Number(r.over_amount).toLocaleString("en-US")} ${r.over_currency==="جنيه"?"ج":"$"}</b></span>`:""}
           ${r.size?`<span>المساحة: <b class="budget">${Number(r.size).toLocaleString("ar-EG")} م²</b></span>`:""}
           ${r.source?`<span>المصدر: ${esc(r.source)}</span>`:""}
           ${r.name?`<span>الاسم: ${esc(r.name)}</span>`:""}
@@ -546,7 +582,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   $("list").addEventListener("toggle",e=>{const d=e.target;if(!d.classList||!d.classList.contains("match"))return;d.open?openMatches.add(d.dataset.id):openMatches.delete(d.dataset.id)},true);
 
   $("statusChips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;statusFilter=b.dataset.s;render()});
-  ["qText","qArea","qRole","qType","qSort"].forEach(id=>$(id).addEventListener("input",render));
+  ["qText","qArea","qProj","qRole","qType","qSort"].forEach(id=>$(id).addEventListener("input",render));
   $("list").addEventListener("change",async e=>{
     const it=e.target.closest(".item"); if(!it||!store)return; const id=it.dataset.id;
     try{
@@ -558,7 +594,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     const b=e.target.closest("button[data-act]"); if(!b)return;
     if(b.dataset.act==="goto"){
       const t=b.dataset.target;
-      statusFilter=""; ["qText","qArea","qRole","qType"].forEach(k=>$(k).value=""); render();
+      statusFilter=""; ["qText","qArea","qProj","qRole","qType"].forEach(k=>$(k).value=""); render();
       const el=[...document.querySelectorAll(".item")].find(x=>x.dataset.id===t);
       if(el){el.scrollIntoView({behavior:"smooth",block:"center"});el.classList.add("flash");setTimeout(()=>el.classList.remove("flash"),1800)}
       return;
@@ -566,7 +602,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     const it=b.closest(".item"), id=it.dataset.id, r=rows.find(x=>x.id===id); if(!r)return;
     if(b.dataset.act==="edit"){
       editing=id; $("fLink").value=r.link||""; $("fSource").value=r.source||""; $("fArea").value=r.area||"";
-      $("fName").value=r.name||""; $("fPhone").value=r.phone||""; $("fSize").value=r.size||""; $("fromPost").open=!!r.link;
+      $("fName").value=r.name||""; $("fPhone").value=r.phone||""; $("fSize").value=r.size||"";
+      $("fBW").checked=r.project==="بيت الوطن"; $("fPlot").value=r.plot_no||""; $("fPaid").value=r.paid_usd||""; $("fOver").value=r.over_amount||""; $("fOverCur").value=r.over_currency||"دولار"; $("fromPost").open=!!r.link;
       $("fType").value=r.type||"شقة"; $("fPurpose").value=r.purpose||"شراء"; syncRole(); $("fBudget").value=r.budget||"";
       {const pp=r.pay||"";$("fPay").value=pp.startsWith("تقسيط")?"تقسيط":pp;$("fTerm").value=pp.startsWith("تقسيط - ")?pp.slice(8):"";$("fTerm").hidden=!pp.startsWith("تقسيط")} $("fFollow").value=r.followUp||""; $("fNote").value=r.note||"";
       $("saveBtn").textContent="حفظ التعديل"; $("cancelEdit").hidden=false; $("formMsg").textContent="";
@@ -591,34 +628,62 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     const out={}, t=norm(raw);
     const link=(raw.match(/https?:\/\/[^\s"'<>]+/)||[])[0]; if(link)out.link=link;
     const ph=normPhone((t.replace(/[\s-]/g,"").match(/(?:\+?20|0020)?01[0125]\d{8}/)||[])[0]); if(ph)out.phone=ph;
-    const sz=t.match(/(\d{2,5})\s*(متر|م2|م²|مترمربع)/); if(sz)out.size=+sz[1];
-    for(const [re,v] of AREA_RULES){if(re.test(t)){out.area=v;break}}
+    const sz=t.match(/(\d{2,5})\s*(متر|م2|م²|م(?=\s|$|\n))/); if(sz)out.size=+sz[1];
+    if(/بيت (ال)?وطن/.test(t)){
+      out.bw=true; out.type="أرض";
+      const pl=t.match(/قطعه(?: ارض)?(?: رقم)?\s*(\d+)/); if(pl)out.plot=pl[1];
+      const pd=t.match(/مدفوع(?: منها)?\s*([\d.,]+)\s*(الف)?/); if(pd){let n=parseFloat(pd[1].replace(",","."));if(pd[2])n*=1000;out.paid=Math.round(n)}
+      const ov=t.match(/([\d.,]+)\s*(الف)?\s*(دولار|جنيه|ج)?\s*اوفر/)||t.match(/اوفر\s*([\d.,]+)\s*(الف)?\s*(دولار|جنيه|ج)?/);
+      if(ov){let n=parseFloat(ov[1].replace(",","."));if(ov[2])n*=1000;out.over=Math.round(n);out.overCur=/جنيه|^ج$/.test(ov[3]||"")?"جنيه":"دولار"}
+    }
+    for(const [re,v] of [[/الحي (ال)?حداشر|الحي (ال)?حادي ?عشر/,"الحي 11"],[/الحي (ال)?(اتناشر|اطناشر|ثاني ?عشر)/,"الحي 12"],[/الحي (ال)?(تلتاشر|ثالث ?عشر)/,"الحي 13"],...AREA_RULES]){if(re.test(t)){out.area=v;break}}
     for(const [re,v] of TYPE_RULES){if(re.test(t)){out.type=v;break}}
-    if(/مطلوب|عايز|عاوز|محتاج|ادور|بدور|اشتري|للشراء/.test(t))out.purpose="شراء"; else if(/للبيع|بيع|من المالك|عندي|املك|تمليك/.test(t))out.purpose="تسويق";
+    const tp=t.replace(/مطلوب\s*[\d.,]+\s*(الف)?\s*(دولار|جنيه)?\s*اوفر/g," ");
+    if(out.bw&&(out.paid||/مطلوب\s*[\d.,]+\s*(الف)?\s*(دولار|جنيه)?\s*اوفر/.test(t))&&!/عايز|عاوز|محتاج|ادور|بدور|اشتري|للشراء/.test(tp))out.purpose="تسويق"; else
+    if(/مطلوب|عايز|عاوز|محتاج|ادور|بدور|اشتري|للشراء/.test(tp))out.purpose="شراء"; else if(/للبيع|بيع|من المالك|عندي|املك|تمليك/.test(t))out.purpose="تسويق";
     if(/تقسيط|قسط|اقساط|مقدم/.test(t)){out.pay="تقسيط";const tm=t.match(/(\d+)\s*(شهر|شهور|سنه|سنين|سنوات)/)||(/سنتين/.test(t)?[0,"2","سنين"]:/(علي|على) سنه|لمده سنه/.test(t)?[0,"1","سنه"]:null);if(tm){out.term=/شه/.test(tm[2])?tm[1]+" شهور":tm[1]==="1"?"سنة":tm[1]==="2"?"سنتين":tm[1]+" سنين"}} else if(/كاش|نقدي/.test(t))out.pay="كاش";
     const clean=t.replace(/https?:\/\/\S+/g," ").replace(/(\+?2)?01[0125]\d{8}/g," ");
-    const m=clean.match(/(\d+(?:[.,٫]\d+)?)\s*(مليون|مليونين|م\b|الف|ك\b|k\b)/i);
+    const m=out.bw?null:clean.match(/(\d+(?:[.,٫]\d+)?)\s*(مليون|مليونين|م\b|الف|ك\b|k\b)/i);
     if(m){let n=parseFloat(m[1].replace(/[,٫]/,"."));const u=m[2];n*= /مليون|م/.test(u)?1e6:1e3;out.budget=Math.round(n)}
     else if(/مليون ?و ?نص/.test(clean))out.budget=1.5e6;
     else if(/مليونين/.test(clean))out.budget=2e6;
     else if(/(^|\s)مليون/.test(clean))out.budget=1e6;
-    else{const big=(clean.match(/\b\d{4,8}\b/g)||[]).map(Number).filter(v=>v>=3000);if(big.length)out.budget=Math.max(...big)}
+    else if(!out.bw){const big=(clean.match(/\b\d{4,8}\b/g)||[]).map(Number).filter(v=>v>=3000);if(big.length)out.budget=Math.max(...big)}
     const note=String(raw).replace(/https?:\/\/[^\s]+/g,"").replace(/(\+?2)?0?1[0125][\s-]?\d{3,4}[\s-]?\d{4}/g,"").replace(/[٠-٩]{11}/g,"").replace(/\s+/g," ").trim();
     if(note)out.note=note.slice(0,300);
     return out;
   }
-  const NAMES={phone:"الموبايل",size:"المساحة",link:"اللينك",area:"المنطقة",type:"النوع",purpose:"مشتري/مالك",pay:"الدفع",budget:"الميزانية",note:"التفاصيل"};
+  const NAMES={plot:"رقم القطعة",paid:"المدفوع",over:"الأوفر",phone:"الموبايل",size:"المساحة",link:"اللينك",area:"المنطقة",type:"النوع",purpose:"مشتري/مالك",pay:"الدفع",budget:"الميزانية",note:"التفاصيل"};
   function applyPaste(){
     const p=parsePost($("fPaste").value), hits=[];
     const set=(id,v,k,label)=>{if(v==null||v==="")return;const el=$(id);el.value=v;el.classList.add("filled");setTimeout(()=>el.classList.remove("filled"),1600);hits.push(`${NAMES[k]}: ${label??v}`)};
+    if(p.bw){$("fBW").checked=true;hits.push("بيت الوطن")}
     set("fLink",p.link,"link","✓"); set("fArea",p.area,"area"); set("fType",p.type,"type");
+    set("fPlot",p.plot,"plot"); set("fPaid",p.paid,"paid",p.paid?p.paid.toLocaleString("en-US")+" $":null); set("fOver",p.over,"over",p.over?p.over.toLocaleString("en-US")+(p.overCur==="جنيه"?" ج":" $"):null); if(p.overCur)$("fOverCur").value=p.overCur;
     set("fPurpose",p.purpose,"purpose"); syncRole(); set("fPhone",p.phone,"phone"); set("fSize",p.size,"size",p.size?p.size+" م²":null); set("fPay",p.pay,"pay"); if(p.pay==="تقسيط"){$("fTerm").hidden=false;if(p.term)set("fTerm",p.term,"pay","مدة "+p.term)}
     if(p.budget)set("fBudget",p.budget,"budget",fmtBudget(p.budget));
     set("fNote",p.note,"note","✓");
     if(!$("fFollow").value){const d=new Date(Date.now()+864e5);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());$("fFollow").value=d.toISOString().slice(0,10)}
     try{const s=localStorage.getItem("radar-last-source");if(s&&!$("fSource").value)$("fSource").value=s}catch(e){}
-    $("pasteHits").innerHTML=hits.length?hits.map(h=>`<span class="chip">${esc(h)}</span>`).join("")+(p.area?"":`<span class="chip" style="background:var(--due-soft)">اختار المنطقة بإيدك</span>`):"";
+    const parts=$("fPaste").value.split(/\n\s*[-_=ـ]{4,}\s*\n/).map(x=>x.trim()).filter(Boolean);
+    bulkParts=parts.length>1?parts.map(parsePost).filter(x=>x.area||x.plot):[];
+    syncRole();
+    $("pasteHits").innerHTML=(bulkParts.length>1?`<button type="button" class="btn small" id="bulkBtn">لقيت ${bulkParts.length} قطع — سجّلهم كلهم مرة واحدة</button>`:"")+(hits.length?hits.map(h=>`<span class="chip">${esc(h)}</span>`).join("")+(p.area?"":`<span class="chip" style="background:var(--due-soft)">اختار المنطقة بإيدك</span>`):"");
   }
+  let bulkParts=[];
+  $("pasteHits").addEventListener("click",async e=>{
+    if(e.target.id!=="bulkBtn"||!store)return;
+    const b=e.target; b.disabled=true;
+    const phone=normPhone($("fPhone").value), src=$("fSource").value.trim(), name=$("fName").value.trim()||null, fu=$("fFollow").value||"";
+    let ok=0;
+    for(const p of bulkParts){
+      try{await store.add({project:p.bw?"بيت الوطن":null,plot_no:p.plot||null,paid_usd:p.paid||null,over_amount:p.over||null,over_currency:p.over?(p.overCur||"دولار"):null,
+        name,phone:phone||null,size:p.size||null,source:src,area:p.area||"غير محدد",type:p.type||"أرض",purpose:p.purpose||"تسويق",
+        budget:p.bw?null:(p.budget||null),pay:p.pay||"",followUp:fu,note:p.note||"",link:"",status:"new",createdAt:new Date().toISOString()});ok++}catch(err){}
+    }
+    $("formMsg").className="msg"; $("formMsg").textContent=`اتسجّل ${ok} من ${bulkParts.length}`;
+    resetForm(); $("pasteHits").innerHTML=""; bulkParts=[];
+  });
   window.radarPaste=t=>{$("fPaste").value=t;applyPaste();$("form").scrollIntoView({block:"start"})};
   let pasteT=null;
   $("fPaste").addEventListener("input",()=>{clearTimeout(pasteT);pasteT=setTimeout(applyPaste,250)});
