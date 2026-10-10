@@ -34,7 +34,8 @@ img{max-width:100%}
 .brand .msg{color:var(--gold);border:1px solid color-mix(in srgb,var(--gold) 45%,transparent);border-radius:999px;padding:3px 12px}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;direction:rtl}
-.wrap{max-width:1600px;margin:0 auto;padding:24px clamp(16px,3vw,40px) 48px;display:grid;gap:20px}
+.wrap{max-width:1600px;margin:0 auto;padding:24px clamp(16px,3vw,40px) 48px;display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
+.wrap>*{min-width:0}
 header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
 h1{font-family:var(--f-display);font-weight:700;font-size:clamp(26px,5vw,36px);margin:0;line-height:1.2;text-wrap:balance}
 h1 span{color:var(--accent)}
@@ -337,6 +338,50 @@ body.modal-open{overflow:hidden}
   .rc-foot .postbtn{grid-column:1/-1;padding:10px}
 }
 .rc-title .rc-size{color:var(--ink);font-weight:700}
+
+/* ===== phone/tablet: requests first, then the form ===== */
+.fab{display:none}
+@media (max-width:1199px){
+  .wrap>.brand{order:0}
+  .wrap>section[aria-labelledby="listH"]{order:1}
+  .wrap>section[aria-labelledby="addH"]{order:2}
+  .wrap>.stats{order:3}
+  .wrap>details[aria-labelledby="qsH"]{order:4}
+  .wrap>.two-wrap{order:5}
+  .wrap>*{order:6}
+  .wrap>.brand{order:0}
+  .wrap>section[aria-labelledby="listH"]{order:1}
+  .wrap>section[aria-labelledby="addH"]{order:2}
+  .wrap>.stats{order:3}
+  .wrap>details[aria-labelledby="qsH"]{order:4}
+  .wrap>.two-wrap{order:5}
+  .fab{display:flex;align-items:center;gap:6px;position:fixed;z-index:40;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:16px;background:var(--ink);color:var(--gold);border:1px solid var(--gold);border-radius:999px;padding:12px 20px;font:inherit;font-weight:700;font-size:15px;box-shadow:0 8px 24px rgba(0,0,0,.25);cursor:pointer;text-decoration:none}
+  body.modal-open .fab{display:none}
+  .wrap{padding-bottom:90px}
+}
+
+#areaChips{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+#areaChips:empty{display:none}
+#areaChips .chip{background:var(--surface);border-color:var(--accent-soft);font-size:13px;padding:5px 12px}
+#areaChips .chip{display:inline-flex;align-items:center;gap:7px}
+#areaChips .chip b{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:11.5px;font-weight:700;unicode-bidi:isolate}
+#areaChips .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+#areaChips .chip[aria-pressed="true"] b{background:rgba(255,255,255,.25);color:inherit}
+.filtbox>summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-weight:600;font-size:14px;color:var(--accent);border:1px solid var(--line);border-radius:999px;padding:6px 14px;background:var(--bg)}
+.filtbox>summary::-webkit-details-marker{display:none}
+.filtbox>summary::after{content:"▾";font-size:12px}
+.filtbox[open]>summary::after{content:"▴"}
+@media (max-width:640px){
+  #statusChips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+  #statusChips::-webkit-scrollbar{display:none}
+  #statusChips .chip{flex:none}
+  #areaChips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+  #areaChips::-webkit-scrollbar{display:none}
+  #areaChips .chip{flex:none}
+  .brand{padding:12px 14px}
+  .brand img{width:52px}
+  .brand .name{font-size:28px}
+}
 </style>
 </head>
 <body>
@@ -474,6 +519,8 @@ body.modal-open{overflow:hidden}
       <button class="btn small danger" id="clearEx" type="button" hidden>حذف الأمثلة</button>
     </div>
     <div class="chips" id="statusChips" style="margin-top:12px" role="group" aria-label="فلترة بالحالة"></div>
+    <div class="chips" id="areaChips" role="group" aria-label="فلترة بالحي"></div>
+    <details class="filtbox" id="filtBox"><summary>بحث وفلترة</summary>
     <div class="filters">
       <label class="q">بحث<input id="qText" placeholder="كلمة في التفاصيل أو الجروب"></label>
       <label>المنطقة<select id="qArea"><option value="">الكل</option></select></label>
@@ -482,9 +529,11 @@ body.modal-open{overflow:hidden}
       <label>النوع<select id="qType"><option value="">الكل</option></select></label>
       <label>الترتيب<select id="qSort"><option value="new">الأحدث</option><option value="follow">أقرب متابعة</option><option value="budget">الميزانية الأعلى</option><option value="match">أكتر مطابقات</option></select></label>
     </div>
+    </details>
     <div class="list" id="list"></div>
   </section>
 </div>
+<button type="button" class="fab" id="fabAdd">＋ تسجيل طلب</button>
 <div class="pm" id="postModal" hidden role="dialog" aria-modal="true" aria-labelledby="pmTitle">
   <div class="pm-sheet">
     <button type="button" class="rc-x" id="pmClose" aria-label="اقفل">✕</button>
@@ -640,6 +689,7 @@ body.modal-open{overflow:hidden}
     try{
       if(editing){await store.update(editing,rec);$("formMsg").textContent="اتعدّل"}
       else{await store.add({...rec,status:"new",createdAt:new Date().toISOString()});$("formMsg").textContent="اتحفظ"}
+      if(!editing&&matchMedia("(max-width:1199px)").matches)setTimeout(()=>document.querySelector('section[aria-labelledby="listH"]').scrollIntoView({behavior:"smooth",block:"start"}),300);
       $("formMsg").className="msg"; resetForm(); $("fPaste").value=""; $("clearPaste").hidden=true; $("pasteHits").innerHTML=""; $("fPaste").focus();
     }catch(err){
       $("formMsg").className="msg err";
@@ -800,6 +850,13 @@ body.modal-open{overflow:hidden}
       const n=s.k==="__match"?nMatch:s.k?rows.filter(r=>r.status===s.k).length:rows.length;
       return `<button type="button" class="chip" data-s="${s.k}" aria-pressed="${statusFilter===s.k}">${s.t} · ${n.toLocaleString("ar-EG")}</button>`}).join("");
 
+    {const cnt={};rows.forEach(r=>{if(r.area)cnt[r.area]=(cnt[r.area]||0)+1});
+     const ord=a=>{const i=AREAS.indexOf(a);return i<0?99:i};
+     const used=Object.keys(cnt).sort((a,b)=>ord(a)-ord(b)||a.localeCompare(b,"ar"));
+     const cur=$("qArea").value;
+     $("areaChips").innerHTML=used.length<1?"":[`<button type="button" class="chip" data-a="" aria-pressed="${!cur}">كل الأحياء</button>`,
+       ...used.map(a=>`<button type="button" class="chip" data-a="${esc(a)}" aria-pressed="${cur===a}"><span>${esc(a)}</span><b>${cnt[a].toLocaleString("ar-EG")}</b></button>`)].join("");}
+
     const q=$("qText").value.trim(), qa=$("qArea").value, qt=$("qType").value, sort=$("qSort").value;
     const qr=$("qRole").value, qp=$("qProj").value;
     let list=rows.filter(r=>(!qp||(qp==="bw")===(r.project==="بيت الوطن"))&&(!statusFilter||(statusFilter==="__match"?(matchMap.get(r.id)||[]).length>0:r.status===statusFilter))&&(!qr||r.purpose===qr)&&(!qa||r.area===qa)&&(!qt||r.type===qt)
@@ -833,6 +890,9 @@ body.modal-open{overflow:hidden}
   }
   $("list").addEventListener("toggle",e=>{const d=e.target;if(!d.classList||!d.classList.contains("match"))return;d.open?openMatches.add(d.dataset.id):openMatches.delete(d.dataset.id)},true);
 
+  $("areaChips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;const a=b.dataset.a;
+    $("qArea").value=($("qArea").value===a)?"":a;render();
+    const on=$("areaChips").querySelector('[aria-pressed="true"]');if(on&&on.scrollIntoView)on.scrollIntoView({block:"nearest",inline:"center"})});
   $("statusChips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;statusFilter=b.dataset.s;render()});
   ["qText","qArea","qProj","qRole","qType","qSort"].forEach(id=>$(id).addEventListener("input",render));
   $("list").addEventListener("change",async e=>{
@@ -961,6 +1021,8 @@ body.modal-open{overflow:hidden}
   $("clearPaste").addEventListener("click",()=>{resetForm();$("fPaste").value="";$("pasteHits").innerHTML="";$("clearPaste").hidden=true;$("fPaste").focus()});
   $("fSource").addEventListener("change",()=>{try{localStorage.setItem("radar-last-source",$("fSource").value)}catch(e){}});
 
+  $("fabAdd").addEventListener("click",()=>{document.querySelector('section[aria-labelledby="addH"]').scrollIntoView({behavior:"smooth",block:"start"});setTimeout(()=>{try{$("fPaste").focus({preventScroll:true})}catch(e){}},450)});
+  if(!matchMedia("(max-width:1199px)").matches)$("filtBox").open=true;
   /* ---------- branded post generator ---------- */
   let postRow=null, postUrl=null, postBlob=null;
   const logoImg=new Image(); logoImg.src="logo.jpg";
