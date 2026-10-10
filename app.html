@@ -79,10 +79,10 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .empty-note{color:var(--muted);font-size:14px;margin:10px 0 0}
 .filters{display:grid;grid-template-columns:2fr repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
 @media (max-width:760px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}.filters .q{grid-column:1/-1}}
-.list{display:grid;gap:10px;margin-top:14px}
-.item{border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:grid;gap:8px;background:var(--surface)}
-.item.late{border-inline-start:4px solid var(--late)}
-.item.due{border-inline-start:4px solid var(--due)}
+
+
+
+
 .top{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
 .title{font-weight:700;font-size:16px}
 .tag{font-size:12.5px;border-radius:999px;padding:2px 10px;background:var(--accent-soft);color:var(--ink)}
@@ -151,10 +151,10 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 @media (min-width:1200px){
   .wrap{grid-template-columns:minmax(0,5fr) minmax(0,7fr);align-items:start}
   .wrap>.brand,.wrap>.stats{grid-column:1/-1}
-  .wrap>section[aria-labelledby="qsH"]{grid-column:1;grid-row:3}
+  .wrap>details[aria-labelledby="qsH"]{grid-column:1;grid-row:3}
   .wrap>section[aria-labelledby="addH"]{grid-column:1;grid-row:4}
   .wrap>section[aria-labelledby="listH"]{grid-column:2;grid-row:3/span 3}
-  .wrap>.two{grid-column:1;grid-row:5;grid-template-columns:1fr 1fr}
+  .wrap>.two-wrap{grid-column:1;grid-row:5}
   .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .grid .wide{grid-column:1/-1}
 }
@@ -180,7 +180,6 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   input,select,textarea{font-size:16px}
   .grid{gap:8px}
   .chip{padding:7px 12px}
-  .item{padding:12px}
   .title{font-size:15.5px}
   .ctrl{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:stretch}
   .ctrl a{display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:8px;padding:8px;text-decoration:none;font-size:14px}
@@ -190,6 +189,152 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   .match li{padding:8px}
   .bar{grid-template-columns:minmax(80px,110px) 1fr 28px;font-size:13.5px}
   .row-actions .btn{flex:1 1 auto}
+}
+
+/* ===== request cards ===== */
+.list{display:grid;gap:16px;margin-top:16px}
+.rc{border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden;display:grid;box-shadow:0 2px 10px rgba(30,28,26,.06)}
+.rc.late{border:2px solid var(--late)}
+.rc.due{border:2px solid var(--due)}
+.rc-head{padding:14px 16px 12px;display:grid;gap:8px;border-bottom:1px solid var(--line)}
+.rc-buy .rc-head{background:#EAF1F8}
+.rc-own .rc-head{background:var(--accent-soft)}
+.rc-mkt .rc-head{background:#F0EAF6}
+.rc-badges{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.rc-badges .role{font-size:13.5px;padding:3px 12px;border-radius:999px}
+.role.buy{background:#2F5D8A}
+.rc-titlerow{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 16px}
+.rc-title{margin:0;font-size:20px;font-weight:700;line-height:1.35}
+.rc-title span{font-weight:600;color:var(--muted)}
+.rc-price{font-size:20px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;white-space:nowrap}
+.rc-contact{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 16px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.rc-person{display:grid;gap:2px;min-width:0}
+.rc-lbl{font-size:12.5px;color:var(--muted);letter-spacing:.02em}
+.rc-name{font-size:19px;line-height:1.3;overflow-wrap:anywhere}
+.rc-phone{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.5px;text-align:right}
+.muted{color:var(--muted);font-weight:400;font-size:15px}
+.rc-actions{display:flex;flex-wrap:wrap;gap:8px}
+.act{font:inherit;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px;padding:9px 16px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:center}
+.act.call{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.act.wa{background:#1F7A3D;border-color:#1F7A3D;color:#fff}
+.rc-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0;padding:6px 16px 10px;gap:0 16px}
+.rc-f{padding:9px 0;border-bottom:1px dashed var(--line);min-width:0}
+.rc-f dt{font-size:12.5px;color:var(--muted)}
+.rc-f dd{margin:2px 0 0;font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.rc-f.ltrnum dd{direction:ltr;text-align:right}
+.rc-note{margin:0 16px 12px;background:var(--bg);border-radius:10px;padding:10px 12px}
+.rc-note p{margin:4px 0 0;font-size:15.5px;line-height:1.7;overflow-wrap:anywhere;white-space:pre-line}
+.rc>.match{margin:0 16px 12px}
+.rc-foot{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 14px;padding:12px 16px;background:var(--bg);border-top:1px solid var(--line)}
+.rc-ctl{display:grid;gap:3px;font-size:12.5px;color:var(--muted)}
+.rc-ctl select,.rc-ctl input{width:auto;min-width:140px;padding:7px 10px;font-size:15px;background:var(--surface)}
+.rc-edit{display:flex;gap:8px;margin-inline-start:auto}
+.rc-edit .btn.small{padding:8px 16px;font-size:14.5px}
+@media (max-width:900px){.rc-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:640px){
+  .rc-head,.rc-contact,.rc-foot{padding-inline:12px}
+  .rc-grid{grid-template-columns:repeat(2,minmax(0,1fr));padding-inline:12px;gap:0 12px}
+  .rc-note,.rc>.match{margin-inline:12px}
+  .rc-title,.rc-price{font-size:18px}
+  .rc-contact{display:grid}
+  .rc-actions{display:grid;grid-template-columns:repeat(3,1fr)}
+  .rc-actions .act{padding:10px 6px}
+  .rc-foot{display:grid;grid-template-columns:1fr 1fr}
+  .rc-ctl select,.rc-ctl input{min-width:0;width:100%}
+  .rc-edit{grid-column:1/-1;margin:0;display:grid;grid-template-columns:1fr 1fr}
+}
+
+/* ===== calm pass ===== */
+.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between}
+.fold>summary::-webkit-details-marker{display:none}
+.fold>summary::after{content:"▾";color:var(--muted);font-size:14px}
+.fold[open]>summary::after{content:"▴"}
+.fold>summary h2{font-size:16px;font-weight:600;color:var(--muted)}
+.list{gap:20px}
+.rc{border:1px solid var(--line);box-shadow:none;border-top:4px solid var(--line)}
+.rc-buy{border-top-color:#7FA3C6}
+.rc-own{border-top-color:var(--gold)}
+.rc-mkt{border-top-color:#A891C2}
+.rc.late{border:1px solid var(--line);border-top:4px solid var(--late)}
+.rc.due{border:1px solid var(--line);border-top:4px solid var(--due)}
+.rc-head,.rc-buy .rc-head,.rc-own .rc-head,.rc-mkt .rc-head{background:var(--surface);border-bottom:0;padding:18px 20px 8px}
+.rc-badges{gap:8px}
+.rc-badges .tag{font-size:12px;background:var(--bg);color:var(--muted)}
+.rc-badges .tag.late{background:var(--late-soft);color:var(--late)}
+.rc-badges .tag.due{background:var(--due-soft);color:var(--due)}
+.rc-badges .bwtag{background:var(--ink)!important;color:var(--gold)!important}
+.rc-badges .role{font-size:12.5px;padding:2px 10px}
+.rc-date{margin-inline-start:auto;font-size:12.5px;color:var(--muted)}
+.rc-title{font-size:19px}
+.rc-title span{font-weight:500}
+.rc-price{font-size:18px;color:var(--accent)}
+.rc-contact{border-bottom:0;margin:4px 20px 0;border-radius:12px;background:var(--bg);padding:12px 16px}
+.rc-name{font-size:17px}
+.rc-phone{font-size:18px;font-weight:600;color:var(--ink)}
+.act{font-size:14px;font-weight:600;padding:7px 14px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink)}
+.act:hover{border-color:var(--accent);color:var(--accent)}
+.rc-grid{grid-template-columns:repeat(3,minmax(0,1fr));padding:16px 20px 6px;gap:14px 20px}
+.rc-f{border:0;padding:0}
+.rc-f dt{font-size:12px}
+.rc-f dd{font-size:15px;font-weight:600}
+.rc-note{margin:8px 20px 14px;background:transparent;border-inline-start:3px solid var(--line);border-radius:0;padding:2px 12px}
+.rc-note p{font-size:15px}
+.rc>.match{margin:0 20px 14px}
+.rc-foot{background:transparent;border-top:1px solid var(--line);padding:12px 20px}
+.rc-ctl select,.rc-ctl input{min-width:130px;font-size:14px;padding:6px 10px;background:var(--bg)}
+.rc-edit .btn.small{padding:6px 14px;font-size:13.5px}
+@media (max-width:900px){.rc-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){
+  .rc-head{padding:14px 14px 6px}
+  .rc-contact{margin:4px 12px 0;padding:12px}
+  .rc-grid{padding:14px 14px 4px;gap:12px 14px}
+  .rc-note{margin:8px 14px 12px}
+  .rc>.match{margin:0 12px 12px}
+  .rc-foot{padding:12px 14px}
+  .rc-actions .act{padding:9px 4px;border-radius:10px}
+}
+
+/* ===== compact list + detail popup ===== */
+.rc-compact{cursor:pointer;transition:box-shadow .15s,transform .15s}
+.rc-compact:hover{box-shadow:0 6px 18px rgba(30,28,26,.10)}
+.rc-compact:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.rc-compact .rc-head{padding-bottom:14px}
+.rc-sub{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font-size:14px;color:var(--muted)}
+.rc-open{margin-inline-start:auto;color:var(--accent);font-weight:700;font-size:14px}
+.rc-badges .tag.matchtag{background:var(--ok-soft);color:var(--ok)}
+.rc-modal{position:fixed;inset:0;z-index:50;background:rgba(20,18,15,.45);display:grid;place-items:center;padding:24px 16px}
+.rc-sheet{position:relative;width:min(760px,100%);max-height:calc(100dvh - 48px);overflow:auto;border-radius:16px;background:var(--surface);box-shadow:0 24px 60px rgba(0,0,0,.25)}
+.rc-sheet .rc{border:0;border-top:5px solid var(--line);border-radius:16px}
+.rc-sheet .rc-buy{border-top-color:#7FA3C6}.rc-sheet .rc-own{border-top-color:var(--gold)}.rc-sheet .rc-mkt{border-top-color:#A891C2}
+.rc-x{position:absolute;top:10px;left:10px;z-index:2;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:16px;cursor:pointer;color:var(--ink)}
+.rc-sheet .rc-head{padding-left:56px}
+body.modal-open{overflow:hidden}
+@media (max-width:640px){
+  .rc-modal{padding:0;place-items:end stretch}
+  .rc-sheet{width:100%;max-height:92dvh;border-radius:18px 18px 0 0}
+  .rc-sheet .rc{border-radius:18px 18px 0 0}
+}
+
+/* ===== post generator ===== */
+.postbtn{background:var(--ink);border-color:var(--ink);color:var(--gold)}
+.pm{position:fixed;inset:0;z-index:60;background:rgba(20,18,15,.55);display:grid;place-items:center;padding:20px 16px}
+.pm-sheet{position:relative;width:min(980px,100%);max-height:calc(100dvh - 40px);overflow:auto;background:var(--surface);border-radius:16px;padding:20px 22px 22px;box-shadow:0 24px 60px rgba(0,0,0,.3)}
+.pm-sheet h2{margin:0 0 14px;font-size:19px}
+.pm-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+.pm-prev canvas{width:100%;height:auto;border-radius:12px;display:block;box-shadow:0 6px 20px rgba(0,0,0,.2)}
+.pm-side{display:grid;gap:12px}
+.pm-actions{display:grid;gap:8px}
+.pm-actions .btn{text-align:center;text-decoration:none}
+.pm-check{display:flex!important;align-items:center;gap:8px;font-size:14px;color:var(--ink)}
+.pm-check input{width:18px;height:18px;accent-color:var(--accent)}
+#pmText{font-size:14px;line-height:1.7}
+@media (max-width:760px){
+  .pm{padding:0;place-items:end stretch}
+  .pm-sheet{width:100%;max-height:94dvh;border-radius:18px 18px 0 0;padding:16px}
+  .pm-body{grid-template-columns:1fr}
+  .pm-prev{max-width:340px;margin:0 auto}
+  .rc-edit{grid-column:1/-1}
+  .rc-foot .postbtn{grid-column:1/-1;padding:10px}
 }
 </style>
 </head>
@@ -216,16 +361,16 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     <div class="stat"><small>ميزانية المشترين (الوسيط)</small><b id="sBudget">—</b></div>
   </section>
 
-  <section class="panel" aria-labelledby="qsH">
-    <div class="row-actions" style="justify-content:space-between">
-      <h2 id="qsH">بحث سريع في فيسبوك</h2>
+  <details class="panel fold" aria-labelledby="qsH">
+    <summary><h2 id="qsH">بحث سريع في فيسبوك</h2></summary>
+    <div class="row-actions" style="justify-content:flex-end;margin-top:10px">
       <label style="display:flex;gap:8px;align-items:center">المنطقة
         <select id="qsArea" style="width:auto"></select>
       </label>
     </div>
     <p class="msg" style="margin:6px 0 10px">كل زرار بيفتح بحث فيسبوك عن أحدث البوستات بالكلمة دي، شاملًا الجروبات اللي إنت عضو فيها. لما تلاقي طلب، انسخ نص البوست ولينكه والصقهم في مربع "الصق البوست" تحت.</p>
     <div class="chips" id="qsLinks"></div>
-  </section>
+  </details>
 
   <section class="panel" aria-labelledby="addH">
     <h2 id="addH">تسجيل عميل</h2>
@@ -307,16 +452,19 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     </form>
   </section>
 
-  <div class="two">
-    <section class="panel" aria-labelledby="areaH">
+  <details class="panel fold two-wrap">
+    <summary><h2>إحصائيات الطلب حسب الحي والنوع</h2></summary>
+  <div class="two" style="margin-top:12px">
+    <section aria-labelledby="areaH">
       <h2 id="areaH">الطلب حسب المنطقة</h2>
       <div class="bars" id="areaBars"></div>
     </section>
-    <section class="panel" aria-labelledby="typeH">
+    <section aria-labelledby="typeH">
       <h2 id="typeH">الطلب حسب النوع</h2>
       <div class="bars" id="typeBars"></div>
     </section>
   </div>
+  </details>
 
   <section class="panel" aria-labelledby="listH">
     <div class="row-actions" style="justify-content:space-between">
@@ -335,6 +483,30 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     </div>
     <div class="list" id="list"></div>
   </section>
+</div>
+<div class="pm" id="postModal" hidden role="dialog" aria-modal="true" aria-labelledby="pmTitle">
+  <div class="pm-sheet">
+    <button type="button" class="rc-x" id="pmClose" aria-label="اقفل">✕</button>
+    <h2 id="pmTitle">منشور جاهز</h2>
+    <div class="pm-body">
+      <div class="pm-prev"><canvas id="pmCanvas" width="1080" height="1350" aria-label="صورة المنشور"></canvas></div>
+      <div class="pm-side">
+        <label>رقمك اللي يظهر في المنشور
+          <input id="pmPhone" type="tel" inputmode="tel" dir="ltr" placeholder="01xxxxxxxxx" maxlength="16">
+        </label>
+        <label class="pm-check"><input type="checkbox" id="pmPlot" checked> اظهر رقم القطعة</label>
+        <div class="pm-actions">
+          <button type="button" class="btn" id="pmShare" hidden>شارك (واتساب / ستوري)</button>
+          <a class="btn" id="pmDownload" download="العراب-منشور.jpg" href="#">نزّل الصورة</a>
+          <button type="button" class="btn ghost" id="pmCopy">انسخ نص المنشور</button>
+        </div>
+        <label>نص المنشور
+          <textarea id="pmText" rows="9"></textarea>
+        </label>
+        <p class="msg">اسم ورقم المالك أو المسوق مش بيظهروا في المنشور.</p>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -507,6 +679,104 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   }
   let matchMap=new Map();
   const openMatches=new Set();
+  let openId=null;
+  const statusOpts=s=>STATUSES.map(x=>`<option value="${x.k}"${x.k===s?" selected":""}>${x.t}</option>`).join("");
+  function cardHead(r){
+      const fs=followState(r), st=STATUSES.find(s=>s.k===r.status)||STATUSES[0];
+      const own=isOwn(r), rk=r.purpose==="مسوق"?"mkt":own?"own":"buy", bw=r.project==="بيت الوطن";
+      const overTxt=r.over_amount?`${Number(r.over_amount).toLocaleString("en-US")} ${r.over_currency==="جنيه"?"ج":"$"}`:"";
+      const head=bw&&r.over_amount?`${own?"مطلوب "+overTxt+" أوفر":"أقصى أوفر "+overTxt}`
+        :r.budget?`${own?"مطلوب ":"ميزانية "}${fmtBudget(r.budget)}`:"";
+      const titleTxt=bw?(own?`قطعة ${r.plot_no?"رقم "+esc(r.plot_no)+" ":""}بيت الوطن`:`مطلوب قطعة بيت الوطن`)
+        :(own?`${esc(r.type)} للبيع`:`مطلوب ${esc(r.type)}`);
+      return {fs,st,own,rk,bw,head,titleTxt};
+  }
+  function compactCard(r){
+      const {fs,st,rk,bw,head,titleTxt}=cardHead(r);
+      const m=(matchMap.get(r.id)||[]).length;
+      return `<article class="item rc rc-${rk} ${fs} rc-compact" data-id="${esc(r.id)}" tabindex="0" role="button" aria-label="افتح تفاصيل الطلب">
+        <header class="rc-head">
+          <div class="rc-badges">
+            <span class="role ${rk}">${roleName(r)}</span>
+            ${bw?`<span class="tag bwtag">بيت الوطن</span>`:""}
+            <span class="tag ${st.c}">${st.t}</span>
+            ${fs==="late"?`<span class="tag late">متابعة متأخرة</span>`:fs==="due"?`<span class="tag due">متابعة النهارده</span>`:""}
+            ${m?`<span class="tag matchtag">${m.toLocaleString("ar-EG")} مطابقة</span>`:""}
+            ${r.example?`<span class="tag ex">مثال</span>`:""}
+            <span class="rc-date">${r.createdAt?new Date(r.createdAt).toLocaleDateString("ar-EG",{day:"numeric",month:"short"}):""}</span>
+          </div>
+          <div class="rc-titlerow">
+            <h3 class="rc-title">${titleTxt} <span>· ${esc(r.area)}</span></h3>
+            ${head?`<div class="rc-price">${esc(head)}</div>`:""}
+          </div>
+          <div class="rc-sub">${[r.size?Number(r.size).toLocaleString("ar-EG")+" م²":"",r.name?esc(r.name):"",r.source?esc(r.source):""].filter(Boolean).join(" · ")}<span class="rc-open">التفاصيل ←</span></div>
+        </header>
+      </article>`;
+  }
+  function modalHTML(r){
+    return `<div class="rc-modal" data-close="1" role="dialog" aria-modal="true" aria-label="تفاصيل الطلب"><div class="rc-sheet"><button type="button" class="rc-x" data-close="1" aria-label="اقفل">✕</button>${fullCard(r)}</div></div>`;
+  }
+  function fullCard(r){
+      const fs=followState(r), st=STATUSES.find(s=>s.k===r.status)||STATUSES[0], url=safeUrl(r.link);
+      const dis=canWrite?"":" disabled";
+      const own=isOwn(r), rk=r.purpose==="مسوق"?"mkt":own?"own":"buy", bw=r.project==="بيت الوطن";
+      const okPhone=/^01\d{9}$/.test(r.phone||"");
+      const phoneTxt=okPhone?r.phone.replace(/^(\d{3})(\d{4})(\d{4})$/,"$1 $2 $3"):"";
+      const overTxt=r.over_amount?`${Number(r.over_amount).toLocaleString("en-US")} ${r.over_currency==="جنيه"?"ج":"$"}`:"";
+      const head=bw&&r.over_amount?`${own?"مطلوب "+overTxt+" أوفر":"أقصى أوفر "+overTxt}`
+        :r.budget?`${own?"مطلوب ":"ميزانية "}${fmtBudget(r.budget)}`:"";
+      const titleTxt=bw?(own?`قطعة ${r.plot_no?"رقم "+esc(r.plot_no)+" ":""}بيت الوطن`:`مطلوب قطعة بيت الوطن`)
+        :(own?`${esc(r.type)} للبيع`:`مطلوب ${esc(r.type)}`);
+      const dd=(k,v,cls="")=>v?`<div class="rc-f ${cls}"><dt>${k}</dt><dd>${v}</dd></div>`:"";
+      return `<article class="item rc rc-full rc-${rk} ${fs}" data-id="${esc(r.id)}">
+        <header class="rc-head">
+          <div class="rc-badges">
+            <span class="role ${rk}">${roleName(r)}</span>
+            ${bw?`<span class="tag bwtag">بيت الوطن</span>`:""}
+            <span class="tag ${st.c}">${st.t}</span>
+            ${fs==="late"?`<span class="tag late">متابعة متأخرة</span>`:fs==="due"?`<span class="tag due">متابعة النهارده</span>`:""}
+            ${r.example?`<span class="tag ex">مثال</span>`:""}
+            <span class="rc-date">${r.createdAt?new Date(r.createdAt).toLocaleDateString("ar-EG",{day:"numeric",month:"short"}):""}</span>
+          </div>
+          <div class="rc-titlerow">
+            <h3 class="rc-title">${titleTxt} <span>· ${esc(r.area)}</span></h3>
+            ${head?`<div class="rc-price">${esc(head)}</div>`:""}
+          </div>
+        </header>
+        <section class="rc-contact">
+          <div class="rc-person">
+            <span class="rc-lbl">${r.purpose==="مسوق"?"المسوق":own?"المالك":"المشتري"}</span>
+            <b class="rc-name">${r.name?esc(r.name):`<span class="muted">بدون اسم</span>`}</b>
+            ${okPhone?`<span class="rc-phone" dir="ltr">${esc(phoneTxt)}</span>`:`<span class="muted">مفيش رقم</span>`}
+          </div>
+          <div class="rc-actions">
+            ${okPhone?`<a class="act" href="tel:${esc(r.phone)}">اتصال</a>
+            <a class="act" href="https://wa.me/2${esc(r.phone)}" target="_blank" rel="noopener">واتساب</a>
+            <button type="button" class="act" data-act="copy" data-phone="${esc(r.phone)}">نسخ الرقم</button>`:""}
+            ${url?`<a class="act" href="${esc(url)}" target="_blank" rel="noopener">البوست ↗</a>`:""}
+          </div>
+        </section>
+        <dl class="rc-grid">
+          ${dd("نوع العقار",esc(r.type))}
+          ${dd("الحي",esc(r.area))}
+          ${dd("المساحة",r.size?`${Number(r.size).toLocaleString("ar-EG")} م²`:"")}
+          ${dd(own?"السعر المطلوب":"الميزانية",r.budget&&bw?fmtBudget(r.budget):"")}
+          ${dd("طريقة الدفع",esc(r.pay||""))}
+          ${dd("رقم القطعة",bw&&r.plot_no&&!own?esc(r.plot_no):"")}
+          ${dd("المدفوع",r.paid_usd?`${Number(r.paid_usd).toLocaleString("en-US")} $`:"","ltrnum")}
+          ${dd(own?"الأوفر":"أقصى أوفر",r.over_amount&&!head?`${Number(r.over_amount).toLocaleString("en-US")} ${r.over_currency==="جنيه"?"ج":"$"}`:"","ltrnum")}
+          ${dd("المصدر",esc(r.source||""))}
+        </dl>
+        ${r.note?`<div class="rc-note"><span class="rc-lbl">ملاحظات</span><p>${esc(r.note)}</p></div>`:""}
+        ${matchBlock(r)}
+        <footer class="rc-foot">
+          <label class="rc-ctl">الحالة<select data-act="status"${dis}>${statusOpts(r.status)}</select></label>
+          <label class="rc-ctl">يوم المتابعة<input type="date" data-act="follow" value="${esc(r.followUp||"")}"${dis}></label>
+          <button class="btn small postbtn" data-act="post" type="button">اعمل منشور</button>
+          ${canWrite?`<div class="rc-edit"><button class="btn small ghost" data-act="edit" type="button">تعديل</button>
+          <button class="btn small danger" data-act="del" type="button">حذف</button></div>`:""}
+        </footer>
+      </article>`}
   function render(){
     matchMap=buildMatches();
     const active=rows.filter(r=>r.status!=="closed");
@@ -542,39 +812,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     $("count").textContent=`(${list.length.toLocaleString("ar-EG")})`;
     if(!rows.length){$("list").innerHTML=`<p class="empty-note">لسه مفيش طلبات. لما تلاقي بوست "مطلوب" في جروب، انسخ لينكه وحطه في الفورم فوق مع المنطقة والنوع.</p>`;return}
     if(!list.length){$("list").innerHTML=`<p class="empty-note">مفيش طلبات بالفلتر ده.</p>`;return}
-    const statusOpts=s=>STATUSES.map(x=>`<option value="${x.k}"${x.k===s?" selected":""}>${x.t}</option>`).join("");
-    $("list").innerHTML=list.map(r=>{
-      const fs=followState(r), st=STATUSES.find(s=>s.k===r.status)||STATUSES[0], url=safeUrl(r.link);
-      const dis=canWrite?"":" disabled";
-      return `<article class="item ${fs}" data-id="${esc(r.id)}">
-        <div class="top">
-          <span class="role ${r.purpose==="مسوق"?"mkt":isOwn(r)?"own":"buy"}">${roleName(r)}</span>
-          ${r.project==="بيت الوطن"?`<span class="tag bwtag">بيت الوطن${r.plot_no?" · قطعة "+esc(r.plot_no):""}</span>`:""}
-          <span class="title">${isOwn(r)?`${esc(r.type)} للبيع`:`مطلوب ${esc(r.type)}`} · ${esc(r.area)}</span>
-          <span class="tag ${st.c}">${st.t}</span>
-          ${fs==="late"?`<span class="tag late">متابعة متأخرة</span>`:fs==="due"?`<span class="tag due">متابعة النهارده</span>`:""}
-          ${r.example?`<span class="tag ex">مثال</span>`:""}
-        </div>
-        ${r.note?`<p class="note">${esc(r.note)}</p>`:""}
-        ${matchBlock(r)}
-        <div class="meta">
-          ${r.budget?`<span>${isOwn(r)?"السعر":"الميزانية"}: <span class="budget">${fmtBudget(r.budget)}</span>${r.pay?` · ${esc(r.pay)}`:""}</span>`:r.pay?`<span>${esc(r.pay)}</span>`:""}
-          ${r.paid_usd?`<span>المدفوع: <b class="budget">${Number(r.paid_usd).toLocaleString("en-US")} $</b></span>`:""}
-          ${r.over_amount?`<span>${isOwn(r)?"الأوفر":"أقصى أوفر"}: <b class="budget">${Number(r.over_amount).toLocaleString("en-US")} ${r.over_currency==="جنيه"?"ج":"$"}</b></span>`:""}
-          ${r.size?`<span>المساحة: <b class="budget">${Number(r.size).toLocaleString("ar-EG")} م²</b></span>`:""}
-          ${r.source?`<span>المصدر: ${esc(r.source)}</span>`:""}
-          ${r.name?`<span>الاسم: ${esc(r.name)}</span>`:""}
-          ${r.createdAt?`<span>اتسجل ${new Date(r.createdAt).toLocaleDateString("ar-EG",{day:"numeric",month:"short"})}</span>`:""}
-        </div>
-        <div class="ctrl">
-          ${url?`<a href="${esc(url)}" target="_blank" rel="noopener">افتح البوست ↗</a>`:""}
-          ${/^01\d{9}$/.test(r.phone||"")?`<a href="https://wa.me/2${esc(r.phone)}" target="_blank" rel="noopener">واتساب ${esc(r.phone)}</a><a href="tel:${esc(r.phone)}">اتصال</a>`:""}
-          <select data-act="status" aria-label="الحالة"${dis}>${statusOpts(r.status)}</select>
-          <label style="display:flex;gap:6px;align-items:center;font-size:13px">متابعة<input type="date" data-act="follow" value="${esc(r.followUp||"")}"${dis}></label>
-          ${canWrite?`<button class="btn small ghost" data-act="edit" type="button">تعديل</button>
-          <button class="btn small danger" data-act="del" type="button">حذف</button>`:""}
-        </div>
-      </article>`}).join("");
+    $("list").innerHTML=list.map(compactCard).join("")+(openId&&rows.find(x=>x.id===openId)?modalHTML(rows.find(x=>x.id===openId)):"");
+    document.body.classList.toggle("modal-open",!!(openId&&rows.find(x=>x.id===openId)));
   }
 
   function matchBlock(r){
@@ -602,28 +841,42 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
       if(e.target.dataset.act==="follow")await store.update(id,{followUp:e.target.value||""});
     }catch(err){$("syncState").textContent="التعديل ما اتحفظش"}
   });
+  function closeModal(){openId=null;render()}
+  function openModal(id){openId=id;render()}
+  document.addEventListener("keydown",e=>{
+    if(e.key==="Escape"&&openId){closeModal();return}
+    const c=e.target.closest&&e.target.closest(".rc-compact");
+    if(c&&(e.key==="Enter"||e.key===" ")){e.preventDefault();openModal(c.dataset.id)}
+  });
   $("list").addEventListener("click",async e=>{
+    if(e.target.dataset&&e.target.dataset.close){closeModal();return}
+    const c=e.target.closest(".rc-compact"); if(c){openModal(c.dataset.id);return}
     const b=e.target.closest("button[data-act]"); if(!b)return;
+    if(b.dataset.act==="post"){const it=b.closest(".item");if(it)openPost(it.dataset.id);return}
+    if(b.dataset.act==="copy"){
+      const ph=b.dataset.phone;
+      const done=()=>{const t=b.textContent;b.textContent="اتنسخ ✓";setTimeout(()=>{if(b.isConnected)b.textContent=t},1500)};
+      try{navigator.clipboard.writeText(ph).then(done,()=>{b.textContent=ph})}catch(e){b.textContent=ph}
+      return;
+    }
     if(b.dataset.act==="goto"){
-      const t=b.dataset.target;
-      statusFilter=""; ["qText","qArea","qProj","qRole","qType"].forEach(k=>$(k).value=""); render();
-      const el=[...document.querySelectorAll(".item")].find(x=>x.dataset.id===t);
-      if(el){el.scrollIntoView({behavior:"smooth",block:"center"});el.classList.add("flash");setTimeout(()=>el.classList.remove("flash"),1800)}
+      openModal(b.dataset.target); const sh=document.querySelector(".rc-sheet"); if(sh)sh.scrollTop=0;
       return;
     }
     const it=b.closest(".item"), id=it.dataset.id, r=rows.find(x=>x.id===id); if(!r)return;
     if(b.dataset.act==="edit"){
+      openId=null; document.body.classList.remove("modal-open");
       editing=id; $("fLink").value=r.link||""; $("fSource").value=r.source||""; $("fArea").value=r.area||"";
       $("fName").value=r.name||""; $("fPhone").value=r.phone||""; $("fSize").value=r.size||"";
       $("fBW").checked=r.project==="بيت الوطن"; $("fPlot").value=r.plot_no||""; $("fPaid").value=r.paid_usd||""; $("fOver").value=r.over_amount||""; $("fOverCur").value=r.over_currency||"دولار"; $("fromPost").open=!!r.link;
       $("fType").value=r.type||"شقة"; $("fPurpose").value=r.purpose||"شراء"; syncRole(); $("fBudget").value=r.budget||"";
       {const pp=r.pay||"";$("fPay").value=pp.startsWith("تقسيط")?"تقسيط":pp;$("fTerm").value=pp.startsWith("تقسيط - ")?pp.slice(8):"";$("fTerm").hidden=!pp.startsWith("تقسيط")} $("fFollow").value=r.followUp||""; $("fNote").value=r.note||"";
       $("saveBtn").textContent="حفظ التعديل"; $("cancelEdit").hidden=false; $("formMsg").textContent="";
-      $("form").scrollIntoView({behavior:"smooth",block:"start"}); return;
+      render(); $("form").scrollIntoView({behavior:"smooth",block:"start"}); return;
     }
     if(b.dataset.act==="del"){
       if(b.dataset.confirm!=="1"){b.dataset.confirm="1";b.textContent="متأكد؟ اضغط تاني";setTimeout(()=>{if(b.isConnected){b.dataset.confirm="";b.textContent="حذف"}},3000);return}
-      try{await store.remove(id)}catch(err){$("syncState").textContent="الحذف ما تمّش"}
+      openId=null; try{await store.remove(id)}catch(err){$("syncState").textContent="الحذف ما تمّش"}
     }
   });
   $("clearEx").addEventListener("click",async e=>{
@@ -706,6 +959,104 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   $("fPaste").addEventListener("input",e=>{if(e.inputType==="insertFromPaste")return;clearTimeout(pasteT);pasteT=setTimeout(()=>{applyPaste();$("clearPaste").hidden=!$("fPaste").value},300)});
   $("clearPaste").addEventListener("click",()=>{resetForm();$("fPaste").value="";$("pasteHits").innerHTML="";$("clearPaste").hidden=true;$("fPaste").focus()});
   $("fSource").addEventListener("change",()=>{try{localStorage.setItem("radar-last-source",$("fSource").value)}catch(e){}});
+
+  /* ---------- branded post generator ---------- */
+  let postRow=null, postUrl=null, postBlob=null;
+  const logoImg=new Image(); logoImg.src="logo.jpg";
+  const lsGet=k=>{try{return localStorage.getItem(k)||""}catch(e){return ""}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+  const fmtPhone=p=>/^01\d{9}$/.test(p)?p.replace(/^(\d{3})(\d{4})(\d{4})$/,"$1 $2 $3"):p;
+  const money=(n,c)=>`${Number(n).toLocaleString("en-US")} ${c==="جنيه"?"ج":"$"}`;
+  function postData(r,showPlot){
+    const own=isOwn(r), bw=r.project==="بيت الوطن";
+    const tag=own?(bw?"متاح للبيع · بيت الوطن":"متاح للبيع"):(bw?"مطلوب · بيت الوطن":"مطلوب");
+    const t1=bw?(own?`قطعة أرض${showPlot&&r.plot_no?" رقم "+r.plot_no:""}`:"مطلوب قطعة أرض"):(own?`${r.type} للبيع`:`مطلوب ${r.type}`);
+    const t2=`${r.area} – بني سويف الجديدة`;
+    const boxes=[];
+    if(r.size)boxes.push(["المساحة",`${Number(r.size).toLocaleString("en-US")} م²`]);
+    if(bw&&own&&r.paid_usd)boxes.push(["المدفوع منها",money(r.paid_usd,"دولار")]);
+    if(!bw&&r.pay)boxes.push(["طريقة الدفع",r.pay]);
+    let big=null;
+    if(bw&&r.over_amount)big=[own?"الأوفر المطلوب":"أقصى أوفر",money(r.over_amount,r.over_currency)];
+    else if(r.budget)big=[own?"السعر المطلوب":"الميزانية",fmtBudget(r.budget)];
+    return {own,bw,tag,t1,t2,boxes:boxes.slice(0,2),big};
+  }
+  function rr(ctx,x,y,w,h,rad){ctx.beginPath();ctx.moveTo(x+rad,y);ctx.arcTo(x+w,y,x+w,y+h,rad);ctx.arcTo(x+w,y+h,x,y+h,rad);ctx.arcTo(x,y+h,x,y,rad);ctx.arcTo(x,y,x+w,y,rad);ctx.closePath()}
+  async function drawPost(){
+    const r=postRow; if(!r)return;
+    const cv=$("pmCanvas"), ctx=cv.getContext("2d"), W=1080, P=70, L=130;
+    try{await Promise.all([document.fonts.load('700 60px "IBM Plex Sans Arabic"'),document.fonts.load('500 26px "IBM Plex Sans Arabic"'),document.fonts.load('700 64px "Aref Ruqaa"')])}catch(e){}
+    if(!logoImg.complete)await new Promise(res=>{logoImg.onload=logoImg.onerror=res});
+    const d=postData(r,$("pmPlot").checked), phone=normPhone($("pmPhone").value);
+    const cy0=P+L+40, chh=50+58+70+80+50+(d.boxes.length?150+22:0)+(d.big?172:0)+50, H=Math.max(cy0+chh+230,1080);
+    cv.height=H;
+    const plex=(w,s)=>`${w} ${s}px "IBM Plex Sans Arabic", Tahoma, sans-serif`;
+    // background
+    const g=ctx.createRadialGradient(W/2,260,60,W/2,600,1000);g.addColorStop(0,"#46433e");g.addColorStop(.55,"#2A2927");g.addColorStop(1,"#1b1a18");
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    ctx.direction="rtl";ctx.textAlign="right";ctx.textBaseline="alphabetic";
+    // header
+    ctx.save();rr(ctx,W-P-L,P,L,L,18);ctx.clip();
+    if(logoImg.naturalWidth){const s=Math.max(L/logoImg.naturalWidth,L/logoImg.naturalHeight);const iw=logoImg.naturalWidth*s,ih=logoImg.naturalHeight*s;ctx.drawImage(logoImg,W-P-L+(L-iw)/2,P+(L-ih)/2,iw,ih)}
+    ctx.restore();
+    ctx.fillStyle="#D4AF6A";ctx.font='700 64px "Aref Ruqaa", serif';ctx.fillText("العراب للعقارات",W-P-L-24,P+72);
+    ctx.fillStyle="#cfc6b6";ctx.font=plex(500,26);ctx.fillText("بني سويف شرق النيل",W-P-L-24,P+115);
+    // card
+    const cy=cy0, ch=H-cy-230;
+    rr(ctx,P,cy,W-2*P,ch,28);ctx.fillStyle="rgba(255,255,255,.04)";ctx.fill();ctx.lineWidth=2;ctx.strokeStyle="rgba(212,175,106,.45)";ctx.stroke();
+    let y=cy+50; const R=W-P-50, Lx=P+50, inner=R-Lx;
+    // tag pill
+    ctx.font=plex(700,30);const tw=ctx.measureText(d.tag).width+52;
+    rr(ctx,R-tw,y,tw,58,29);ctx.fillStyle="#D4AF6A";ctx.fill();ctx.fillStyle="#1E1C1A";ctx.fillText(d.tag,R-26,y+40);
+    y+=58+70;
+    ctx.fillStyle="#F2EEE6";ctx.font=plex(700,60);
+    ctx.fillText(d.t1,R,y);y+=80;ctx.fillText(d.t2,R,y);y+=50;
+    // boxes
+    const gap=22, bw2=(inner-gap)/2, bh=150;
+    d.boxes.forEach((bx,i)=>{const x=R-bw2-(i*(bw2+gap));
+      rr(ctx,x,y,bw2,bh,18);ctx.fillStyle="rgba(255,255,255,.06)";ctx.fill();
+      ctx.fillStyle="#b9b0a1";ctx.font=plex(500,26);ctx.fillText(bx[0],x+bw2-26,y+46);
+      ctx.fillStyle="#fff";ctx.font=plex(700,46);ctx.fillText(bx[1],x+bw2-26,y+112)});
+    if(d.boxes.length)y+=bh+gap;
+    if(d.big){const bh2=172;const gg=ctx.createLinearGradient(0,y,0,y+bh2);gg.addColorStop(0,"#F0D79A");gg.addColorStop(1,"#C9A25A");
+      rr(ctx,Lx,y,inner,bh2,18);ctx.fillStyle=gg;ctx.fill();
+      ctx.fillStyle="#5a4a2a";ctx.font=plex(500,28);ctx.fillText(d.big[0],R-26,y+50);
+      ctx.fillStyle="#1E1C1A";ctx.font=plex(700,64);ctx.fillText(d.big[1],R-26,y+136)}
+    // footer
+    ctx.textAlign="center";
+    ctx.fillStyle="#F0D79A";ctx.font=plex(700,34);ctx.fillText(d.own?"للتواصل مع العراب":"عندك المطلوب؟ كلّم العراب",W/2,H-150);
+    ctx.fillStyle="#fff";ctx.font=plex(700,58);ctx.direction="ltr";ctx.fillText(phone?fmtPhone(phone):"",W/2,H-75);ctx.direction="rtl";
+    if(!phone){ctx.fillStyle="#cfc6b6";ctx.font=plex(500,30);ctx.fillText("www.alaaelarab.online",W/2,H-80)}
+    // text caption
+    const lines=[d.own?(d.bw?"🏗️ متاح للبيع – بيت الوطن":"🏠 متاح للبيع"):(d.bw?"🔎 مطلوب – بيت الوطن":"🔎 مطلوب"),
+      `${d.t1} – ${d.t2}`];
+    if(r.size)lines.push(`📐 المساحة: ${Number(r.size).toLocaleString("en-US")} م²`);
+    if(d.bw&&d.own&&r.paid_usd)lines.push(`💵 المدفوع منها: ${money(r.paid_usd,"دولار")}`);
+    if(d.big)lines.push(`💰 ${d.big[0]}: ${d.big[1]}`);
+    if(!d.bw&&r.pay)lines.push(`💳 ${r.pay}`);
+    lines.push("",d.own?"📞 للتواصل مع العراب:":"📞 عندك المطلوب؟ كلّمنا:",phone?phone:"www.alaaelarab.online/talab.html","","العراب للعقارات 👑 | بني سويف شرق النيل");
+    $("pmText").value=lines.join("\n");
+    // export
+    cv.toBlob(bl=>{postBlob=bl;if(postUrl)URL.revokeObjectURL(postUrl);postUrl=URL.createObjectURL(bl);$("pmDownload").href=postUrl;
+      $("pmDownload").download=`العراب-${r.plot_no?"قطعة-"+r.plot_no:r.type}.jpg`;
+      try{$("pmShare").hidden=!(navigator.canShare&&navigator.canShare({files:[new File([bl],"alarrab.jpg",{type:"image/jpeg"})]}))}catch(e){$("pmShare").hidden=true}
+    },"image/jpeg",.9);
+  }
+  function openPost(id){
+    postRow=rows.find(x=>x.id===id); if(!postRow)return;
+    $("pmPhone").value=lsGet("radar-post-phone");
+    $("pmPlot").closest("label").hidden=!(postRow.project==="بيت الوطن"&&postRow.plot_no&&isOwn(postRow));
+    $("postModal").hidden=false; document.body.classList.add("modal-open"); drawPost();
+  }
+  function closePost(){$("postModal").hidden=true; if(!openId)document.body.classList.remove("modal-open")}
+  $("pmClose").onclick=closePost;
+  $("postModal").addEventListener("click",e=>{if(e.target.id==="postModal")closePost()});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("postModal").hidden){e.stopImmediatePropagation();closePost()}},true);
+  $("pmPhone").addEventListener("input",()=>{lsSet("radar-post-phone",$("pmPhone").value.trim());clearTimeout(window.__pmT);window.__pmT=setTimeout(drawPost,300)});
+  $("pmPlot").addEventListener("change",drawPost);
+  $("pmCopy").onclick=()=>{const t=$("pmText").value,b=$("pmCopy");
+    const ok=()=>{b.textContent="اتنسخ ✓";setTimeout(()=>b.textContent="انسخ نص المنشور",1500)};
+    try{navigator.clipboard.writeText(t).then(ok,()=>{$("pmText").select();ok()})}catch(e){$("pmText").select();ok()}};
+  $("pmShare").onclick=async()=>{if(!postBlob)return;try{await navigator.share({files:[new File([postBlob],"alarrab.jpg",{type:"image/jpeg"})],text:$("pmText").value})}catch(e){}};
 
   /* ---------- quick Facebook search links ---------- */
   const QS_WORDS=["مطلوب شقة","عايز أشتري شقة","مطلوب أرض","مطلوب فيلا","شقة للبيع من المالك","أرض للبيع من المالك","فيلا للبيع"];
